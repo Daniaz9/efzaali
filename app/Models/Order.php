@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\OrderStatus;
+use App\Enums\OrderType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,6 +11,16 @@ class Order extends Model
 {
     /** @use HasFactory<\Database\Factories\OrderFactory> */
     use HasFactory;
+
+    protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return [
+            'type' => OrderType::class,
+            'status' => OrderStatus::class,
+        ];
+    }
 
     public function customer()
     {

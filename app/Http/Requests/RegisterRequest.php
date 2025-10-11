@@ -30,7 +30,7 @@ class RegisterRequest extends FormRequest
 //            'role' => ['required', 'string', Role::in(['customer','driver','admin'])],
             'phone_number' => 'required|string|max:20',
             'is_available' => 'sometimes|boolean',
-            'avatar' => 'sometimes|image|mimes:jpg,png,jpeg,gif,webp|max:2048',
+//            'avatar' => 'sometimes|image|mimes:jpg,png,jpeg,gif,webp|max:2048',
         ];
     }
 }

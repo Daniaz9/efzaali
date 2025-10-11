@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('customer_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('driver_id')->constrained('users')->onDelete('cascade');
-            $table->enum('type',['fast','slow'])->default('fast');
-            $table->enum('status',['delivered','processing','on_the_way','cancelled','pending'])->default('pending');
+            $table->string('type')->default(\App\Enums\OrderType::FAST);
+            $table->string('status')->default(\App\Enums\OrderStatus::PENDING);
             $table->string('pickup_address');
             $table->string('dropoff_address');
             $table->decimal('pickup_lat', 10, 7);

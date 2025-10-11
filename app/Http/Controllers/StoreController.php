@@ -6,9 +6,13 @@ use App\Models\Store;
 use App\Http\Requests\StoreStoreRequest;
 use App\Http\Requests\UpdateStoreRequest;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\HandlesImages;
+
 
 class StoreController extends Controller
 {
+    use HandlesImages;
+
     /**
      * Display a listing of the resource.
      */
@@ -26,12 +30,18 @@ class StoreController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('logo')) {
-            $validated['logo'] = $request->file('logo')->store('logos', 'public');
+            $filePath = $request->file('logo')->store('photos/stores', 'public');
+            $this->createSmallImage($filePath);
         }
 
         $store = Store::create($validated);
 
-        return $this->sendResponse($store,'store created successfully');
+        $store->photo()->create([
+            'path'=> $filePath
+        ]);
+        $store->load('photo');
+
+        return $this->sendResponse($store,'Store created successfully');
     }
 
     /**
@@ -52,32 +62,35 @@ class StoreController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('logo')) {
+
             $originalLogo = $store->getOriginal('logo');
+            $this->deleteImageAndSmall($originalLogo);
 
-            if ($originalLogo && Storage::disk('public')->exists($originalLogo)) {
-                Storage::disk('public')->delete($originalLogo);
-            }
-
-            $path = $request->file('logo')->store('logos', 'public');
-            $validated['logo'] = $path;
+            $path = $request->file('logo')->store('photos/stores', 'public');
+            $this->createSmallImage($path);
         }
 
         if (!empty($validated)) {
             $store->update($validated);
         }
+        $store->photo()->create([
+            'path' => $path,
+        ]);
 
-        return $this->sendResponse($store, 'store updated successfully');
-    }    /**
+        $store->load('photo');
+
+        return $this->sendResponse($store, 'Store updated successfully');
+    }
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Store $store)
     {
+        $originalLogo = $store->getOriginal('logo');
+        $this->deleteImageAndSmall($originalLogo);
+
         $store->delete();
 
-        if ($store->logo && Storage::disk('public')->exists($store->logo)) {
-            Storage::disk('public')->delete($store->logo);
-        }
-
-        return $this->sendResponse([],'store deleted successfully');
+        return $this->sendResponse([], 'Store deleted successfully');
     }
 }

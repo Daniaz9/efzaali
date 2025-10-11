@@ -4,19 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
     /** @use HasFactory<\Database\Factories\ProductFactory> */
     use HasFactory;
 
-    protected $fillable = [
+    protected $fillable =[
         'store_id',
         'name',
         'description',
         'price',
         'stock',
     ];
+
 
     public function store(){
         return $this->belongsTo(Store::class);
@@ -29,6 +31,7 @@ class Product extends Model
 
     public function photos()
     {
-        return $this->morphMany(Photo::class, 'imageable');
+        return $this->morphMany(\App\Models\Photo::class, 'imageable');
     }
+
 }

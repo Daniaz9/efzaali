@@ -34,14 +34,14 @@ class UserFactory extends Factory
                 $rating = Rating::inRandomOrder()->first();
                 return $rating ? $rating->id : Rating::factory();
             },
-            'role_id' => Role::inRandomOrder()->first()->id,
+//            'role_id' => Role::inRandomOrder()->first()->id,
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
             'is_available' => $this->faker->boolean(),
             'email_verified_at' => now(),
             'password' => Hash::make('password'),
             'phone_number' => $this->faker->phoneNumber(),
-            'avatar' => $this->faker->imageUrl(200, 200, 'people', true, 'avatar'),
+//            'avatar' => $this->faker->imageUrl(200, 200, 'people', true, 'avatar'),
             'remember_token' => Str::random(10),
         ];
     }

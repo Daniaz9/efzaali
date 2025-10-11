@@ -22,7 +22,7 @@ class StoreFactory extends Factory
         return [
             'name' => $this->faker->company(),
             'description' => $this->faker->paragraph(),
-            'logo' => $this->faker->imageUrl(200, 200, 'business', true, 'logo'),
+//            'logo' => $this->faker->imageUrl(200, 200, 'business', true, 'logo'),
             'address' => $this->faker->address(),
         ];
     }

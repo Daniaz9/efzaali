@@ -13,14 +13,12 @@ return new class extends Migration
     {
         Schema::create('photos', function (Blueprint $table) {
             $table->id();
-
             $table->morphs('imageable');
-
-            $table->string('path'); // normal size
-            $table->string('small_path'); // small size
-
-            $table->string('alt_text')->nullable();
-            $table->boolean('is_main')->default(false);
+            $table->string('path');
+//            $table->string('small_path'); // small size
+//
+//            $table->string('alt_text')->nullable();
+//            $table->boolean('is_main')->default(false);
 
             $table->timestamps();
         });

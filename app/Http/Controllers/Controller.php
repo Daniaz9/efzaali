@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Intervention\Image\Drivers\Gd\Driver;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+
+
 abstract class Controller
 {
     public function sendResponse($result, $message)
@@ -28,4 +33,6 @@ abstract class Controller
 
         return response()->json($response, $code);
     }
+
+
 }
