@@ -29,20 +29,26 @@ class StoreController extends Controller
     {
         $validated = $request->validated();
 
-        if ($request->hasFile('logo')) {
-            $filePath = $request->file('logo')->store('photos/stores', 'public');
-            $this->createSmallImage($filePath);
-        }
-
         $store = Store::create($validated);
 
-        $store->photo()->create([
-            'path'=> $filePath
-        ]);
+        if ($request->hasFile('logo')) {
+            // Store main image
+            $filePath = $request->file('logo')->store('photos/stores', 'public');
+
+            // Create the small version
+            $this->createSmallImage($filePath);
+
+            // Attach one photo record to the store
+            $store->photo()->create([
+                'path' => $filePath,
+            ]);
+        }
+
         $store->load('photo');
 
-        return $this->sendResponse($store,'Store created successfully');
+        return $this->sendResponse($store, 'Store created successfully');
     }
+
 
     /**
      * Display the specified resource.
@@ -62,25 +68,29 @@ class StoreController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('logo')) {
-
-            $originalLogo = $store->getOriginal('logo');
-            $this->deleteImageAndSmall($originalLogo);
+            if ($store->photo) {
+                $this->deleteImageAndSmall($store->photo->path);
+                $store->photo()->delete();
+            }
 
             $path = $request->file('logo')->store('photos/stores', 'public');
+
             $this->createSmallImage($path);
+
+            $store->photo()->create([
+                'path' => $path,
+            ]);
         }
 
         if (!empty($validated)) {
             $store->update($validated);
         }
-        $store->photo()->create([
-            'path' => $path,
-        ]);
 
         $store->load('photo');
 
         return $this->sendResponse($store, 'Store updated successfully');
     }
+
     /**
      * Remove the specified resource from storage.
      */

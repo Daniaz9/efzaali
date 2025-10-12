@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Traits\HandlesImages;
+use Illuminate\Support\Facades\Storage;
 
 
 class ProductController extends Controller
@@ -30,17 +31,22 @@ class ProductController extends Controller
         $product = Product::create($validated);
 
         if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $photoFile) {
-                if (! $photoFile->isValid()) continue;
+            $photoFiles = $request->file('photos');
 
-                // store main image (relative path)
+            foreach ($photoFiles as $photoFile) {
+                if (! $photoFile->isValid()) {
+                    continue;
+                }
+
                 $path = $photoFile->store('photos/products', 'public');
 
-                // create small copy (same folder, filename-small.ext)
-                $this->createSmallImage($path);
+                if (! Storage::disk('public')->exists($this->getSmallImagePath($path))) {
+                    $this->createSmallImage($path);
+                }
 
-                // save DB record with main path
-                $product->photos()->create(['path' => $path]);
+                $product->photos()->create([
+                    'path' => $path,
+                ]);
             }
         }
 
@@ -63,26 +69,38 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request, Product $product)
     {
         $validated = $request->validated();
+
+
         if (!empty($validated)) {
             $product->update($validated);
         }
 
         if ($request->hasFile('photos')) {
+            foreach ($product->photos as $oldPhoto) {
+                $this->deleteImageAndSmall($oldPhoto->path);
+                $oldPhoto->delete();
+            }
+
             foreach ($request->file('photos') as $photoFile) {
                 if (! $photoFile->isValid()) continue;
 
                 $path = $photoFile->store('photos/products', 'public');
-                $this->createSmallImage($path);
-                $product->photos()->create(['path' => $path]);
+
+                if (! Storage::disk('public')->exists($this->getSmallImagePath($path))) {
+                    $this->createSmallImage($path);
+                }
+
+                $product->photos()->create([
+                    'path' => $path,
+                ]);
             }
         }
 
         $product->load('photos', 'store');
 
         return $this->sendResponse($product, 'Product updated successfully');
-    }    /**
-     * Remove the specified resource from storage.
-     */
+    }
+
     public function destroy(Product $product)
     {
         // delete all related photos (files + DB rows)
