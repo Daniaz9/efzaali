@@ -28,9 +28,9 @@ class RegisterRequest extends FormRequest
             'password' => 'required|string|min:6',
             'rating' => 'nullable',
 //            'role' => ['required', 'string', Role::in(['customer','driver','admin'])],
-            'phone_number' => 'required|string|max:20',
+            'phone_number' => 'required|string|max:10',
             'is_available' => 'sometimes|boolean',
-//            'avatar' => 'sometimes|image|mimes:jpg,png,jpeg,gif,webp|max:2048',
+            'photo' => 'sometimes|image|mimes:jpg,png,jpeg,gif,webp|max:2048',
         ];
     }
 }

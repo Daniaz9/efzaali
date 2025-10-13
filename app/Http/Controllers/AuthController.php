@@ -8,39 +8,52 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Traits\HandlesImages;
+
 
 class AuthController extends Controller
 {
+    use HandlesImages;
+
     public function register(RegisterRequest $request)
     {
         $validated = $request->validated();
-
-//        $role = Role::where('name', $validated['role'])->firstOrFail();
-
-        $avatarPath = $request->hasFile('avatar')
-            ? $request->file('avatar')->store('avatars', 'public')
-            : 'avatars/default-avatar.jpg';
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role_id' => 1,
             'phone_number' => $validated['phone_number'],
             'is_available' => $validated['is_available'] ?? 0,
-            'avatar' => $avatarPath,
         ]);
+        $user->assignRole('normal-user');
+
+        if ($request->hasFile('photo')) {
+            $avatarPath = $request->file('photo')->store('photos/avatars', 'public');
+
+            $this->createSmallImage($avatarPath);
+
+            $user->photo()->create([
+                'path' => $avatarPath,
+            ]);
+        } else {
+            $defaultPath = 'photos/avatars/default-avatar.jpg';
+            $user->photo()->create([
+                'path' => $defaultPath,
+            ]);
+        }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $this->sendResponse([
-            'user' => $user,
+            'user' => $user->load('photo'),
+            'roles' => $user->getRoleNames(),
             'token' => $token,
             'token_type' => 'Bearer'
         ], 'User registered successfully');
+
     }
 
-    // Login
     public function login(LoginRequest $request)
     {
         $validated = $request->validated();

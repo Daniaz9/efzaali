@@ -82,11 +82,11 @@ class ProductController extends Controller
             }
 
             foreach ($request->file('photos') as $photoFile) {
-                if (! $photoFile->isValid()) continue;
+                if (!$photoFile->isValid()) continue;
 
                 $path = $photoFile->store('photos/products', 'public');
 
-                if (! Storage::disk('public')->exists($this->getSmallImagePath($path))) {
+                if (!Storage::disk('public')->exists($this->getSmallImagePath($path))) {
                     $this->createSmallImage($path);
                 }
 
@@ -95,7 +95,6 @@ class ProductController extends Controller
                 ]);
             }
         }
-
         $product->load('photos', 'store');
 
         return $this->sendResponse($product, 'Product updated successfully');

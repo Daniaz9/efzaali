@@ -22,9 +22,19 @@ class Photo extends Model
 //        return url(Storage::url($value));
 //    }
 
+    public function getFullPathAttribute()
+    {
+        return url('storage/' . $this->attributes['path']);
+    }
+
     public function getPathAttribute($value)
     {
-        return url('storage/' . $value);
+        // Only prepend storage if it's not already a full URL
+        if (str_starts_with($value, 'http')) {
+            return $value;
+        }
+
+        return asset('storage/' . $value);
     }
 
     public function getSmallPathAttribute()
