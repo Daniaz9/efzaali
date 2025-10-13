@@ -26,14 +26,10 @@ class PhotosRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                FileUpload::make('path')
-                    ->label('Photo')
+                FileUpload::make('photos')
                     ->directory('photos/products')
-                    ->image()
-                    ->previewable(true)
-                    ->downloadable()
                     ->multiple()
-                    ->required(),
+                    ->image()
             ]);
     }
 
@@ -45,13 +41,6 @@ class PhotosRelationManager extends RelationManager
                 ImageColumn::make('path')
                     ->label('Photo')
                     ->height(100),
-//                TextColumn::make('imageable_type')
-//                    ->searchable(),
-//                TextColumn::make('imageable_id')
-//                    ->numeric()
-//                    ->sortable(),
-//                TextColumn::make('path')
-//                    ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

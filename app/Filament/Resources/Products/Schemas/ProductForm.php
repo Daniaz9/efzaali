@@ -34,35 +34,10 @@ class ProductForm
                 TextInput::make('stock')
                     ->required()
                     ->numeric(),
-                        FileUpload::make('photos')
-                            ->label('Upload Product Photos')
-                            ->multiple()
-                            ->image()
-                            ->reorderable()
-                            ->directory('photos/products')
-                            ->preserveFilenames()
-                            ->downloadable()
-                            ->previewable(true)
-                            ->getUploadedFileNameForStorageUsing(fn (TemporaryUploadedFile $file): string =>
-                                str()->random(20) . '.' . $file->getClientOriginalExtension()
-                            )
-                            ->saveRelationshipsUsing(function ($component, $state, $record) {
-                                // Delete existing photos (optional if you want to replace all)
-                                $record->photos()->each(function ($photo) {
-                                    // Delete from storage + small version
-                                    (new static)->deleteImageAndSmall(str_replace(asset('storage/') , '', $photo->path));
-                                    $photo->delete();
-                                });
-
-                                if (is_array($state)) {
-                                    foreach ($state as $filePath) {
-                                        // Store main photo
-                                        $photo = $record->photos()->create(['path' => $filePath]);
-                                        // Create small image
-                                        (new static)->createSmallImage($filePath);
-                                    }
-                                }
-                            }),
+                FileUpload::make('photos')
+                    ->directory('photos/products')
+                    ->multiple()
+                    ->image()
             ]);
     }
 }
