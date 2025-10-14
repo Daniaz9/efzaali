@@ -35,9 +35,11 @@ class ProductForm
                     ->required()
                     ->numeric(),
                 FileUpload::make('photos')
-                    ->directory('photos/products')
                     ->multiple()
                     ->image()
+                    ->directory('photos/products')
+                    ->disk('public')
+                    ->visibility('public')
             ]);
     }
 }

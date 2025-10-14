@@ -24,29 +24,28 @@ class CreateProduct extends CreateRecord
 
     protected function handleRecordCreation(array $data): Product
     {
-        // 1️⃣ Create product (without photos)
         $product = Product::create(collect($data)->except('photos')->toArray());
 
-        // 2️⃣ Handle photos
         if (!empty($data['photos'])) {
             foreach ($data['photos'] as $file) {
                 if ($file instanceof TemporaryUploadedFile) {
-                    // Filament Livewire temp file → move it
+                    // New upload
                     $path = $file->store('photos/products', 'public');
                 } elseif (is_string($file)) {
-                    // Already a path string
+                    // Already stored (Filament sometimes does this automatically)
                     $path = $file;
                 } else {
-                    // Skip invalid entries
-                    continue;
+                    continue; // unknown type
                 }
 
-                // ✅ Now $path is guaranteed to be a string
                 if (Storage::disk('public')->exists($path)) {
                     $this->createSmallImage($path);
-                    $product->photos()->create(['path' => $path]);
-                } else {
-                    Log::warning("Missing file after upload: {$path}");
+
+                    $product->photos()->create([
+                        'path' => $path,
+                        'imageable_id' => $product->id,
+                        'imageable_type' => Product::class,
+                    ]);
                 }
             }
         }
