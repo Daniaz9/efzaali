@@ -36,7 +36,9 @@ trait HandlesImages
      */
     protected function deleteImageAndSmall(?string $path): void
     {
-        if (! $path) return;
+        if (! $path)
+
+            return;
 
         if (Storage::disk('public')->exists($path)) {
             Storage::disk('public')->delete($path);

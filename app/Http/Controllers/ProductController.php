@@ -50,7 +50,7 @@ class ProductController extends Controller
             }
         }
 
-        $product->load('photos', 'store');
+        $product->load('photos', 'store','store.photo');
 
         return $this->sendResponse($product, 'Product created successfully');
     }
@@ -59,7 +59,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load('store');
+        $product->load('store.photo','photos');
         return $this->sendResponse($product, 'product details retrieved');
     }
 
@@ -95,7 +95,7 @@ class ProductController extends Controller
                 ]);
             }
         }
-        $product->load('photos', 'store');
+        $product->load('photos', 'store.photo');
 
         return $this->sendResponse($product, 'Product updated successfully');
     }

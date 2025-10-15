@@ -3,12 +3,15 @@
 namespace App\Filament\Resources\Products\Pages;
 
 use App\Filament\Resources\Products\ProductResource;
+use App\Models\Product;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class EditProduct extends EditRecord
 {
+
     protected static string $resource = ProductResource::class;
 
     protected function getHeaderActions(): array
@@ -18,22 +21,4 @@ class EditProduct extends EditRecord
         ];
     }
 
-    protected function handleRecordUpdate($record, array $data): \Illuminate\Database\Eloquent\Model
-    {
-        // Update product details
-        $record->update(collect($data)->except('photos')->toArray());
-
-        // Handle new uploaded photos
-        if (!empty($data['photos'])) {
-            foreach ($data['photos'] as $file) {
-                if ($file instanceof TemporaryUploadedFile) {
-                    $path = $file->store('photos/products', 'public');
-                    $this->createSmallImage($path);
-                    $record->photos()->create(['path' => $path]);
-                }
-            }
-        }
-
-        return $record;
-    }
 }

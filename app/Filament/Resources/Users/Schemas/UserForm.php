@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -13,8 +14,6 @@ class UserForm
     {
         return $schema
             ->components([
-                TextInput::make('rating_id')
-                    ->numeric(),
                 TextInput::make('name')
                     ->required(),
                 TextInput::make('email')
@@ -23,13 +22,22 @@ class UserForm
                     ->required(),
                 Toggle::make('is_available')
                     ->required(),
-                DateTimePicker::make('email_verified_at'),
                 TextInput::make('password')
-                    ->password()
-                    ->required(),
+                    ->dehydrateStateUsing(fn ($state) => filled($state) ? bcrypt($state) : null) // hash only if not empty
+                    ->dehydrated(fn ($state) => filled($state)) // don't send null if empty
+                    ->required(fn (string $operation): bool => $operation === 'create') ,// only required on create
                 TextInput::make('phone_number')
-                    ->tel()
-                    ->required(),
-            ]);
+                    ->tel(),
+                FileUpload::make('photo')
+                    ->label('User Photo')
+                    ->image()
+                    ->disk('public')
+                    ->directory('photos/avatars')
+                    ->visibility('public')
+                    ->previewable(true)
+                    ->downloadable()
+                    ->openable()
+                    ->nullable()
+                ]);
     }
 }

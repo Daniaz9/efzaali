@@ -30,10 +30,10 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'rating_id' => function () {
-                $rating = Rating::inRandomOrder()->first();
-                return $rating ? $rating->id : Rating::factory();
-            },
+//            'rating_id' => function () {
+//                $rating = Rating::inRandomOrder()->first();
+//                return $rating ? $rating->id : Rating::factory();
+//            },
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
             'is_available' => $this->faker->boolean(),

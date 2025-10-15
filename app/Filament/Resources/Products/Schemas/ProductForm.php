@@ -34,12 +34,12 @@ class ProductForm
                 TextInput::make('stock')
                     ->required()
                     ->numeric(),
-                FileUpload::make('photos')
-                    ->multiple()
-                    ->image()
-                    ->directory('photos/products')
-                    ->disk('public')
-                    ->visibility('public')
+//                FileUpload::make('photos')
+//                    ->multiple()
+//                    ->image()
+//                    ->directory('photos/products')
+//                    ->disk('public')
+//                    ->visibility('public')
             ]);
     }
 }

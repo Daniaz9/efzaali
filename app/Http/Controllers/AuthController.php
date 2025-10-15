@@ -67,7 +67,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $this->sendResponse([
-            'user' => $user,
+            'user' => $user->load('photo'),
             'token' => $token,
             'token_type' => 'Bearer'
         ], 'User logged in successfully');

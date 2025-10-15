@@ -28,7 +28,7 @@ class RegisterRequest extends FormRequest
             'password' => 'required|string|min:6',
             'rating' => 'nullable',
 //            'role' => ['required', 'string', Role::in(['customer','driver','admin'])],
-            'phone_number' => 'required|string|max:10',
+            'phone_number' => 'sometimes|string|max:10',
             'is_available' => 'sometimes|boolean',
             'photo' => 'sometimes|image|mimes:jpg,png,jpeg,gif,webp|max:2048',
         ];

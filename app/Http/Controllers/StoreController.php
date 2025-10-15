@@ -19,7 +19,7 @@ class StoreController extends Controller
     public function index()
     {
         $stores=Store::all();
-        return $this->sendResponse($stores,'all stores retrieved');
+        return $this->sendResponse($stores->load('photo'),'all stores retrieved');
     }
 
     /**
@@ -57,7 +57,7 @@ class StoreController extends Controller
     {
 //        if (!$store)
 //            return $this->sendError('');
-        return $this->sendResponse($store,'store details retrieved');
+        return $this->sendResponse($store->load('photo','products'),'store details retrieved');
     }
 
     /**
@@ -96,8 +96,11 @@ class StoreController extends Controller
      */
     public function destroy(Store $store)
     {
-        $originalLogo = $store->getOriginal('logo');
-        $this->deleteImageAndSmall($originalLogo);
+        // Get the photo path from the relationship
+        if ($store->photo) {
+            $this->deleteImageAndSmall($store->photo->path);
+            $store->photo()->delete(); // Also delete the photo record
+        }
 
         $store->delete();
 
