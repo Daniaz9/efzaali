@@ -3,13 +3,15 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles, HasApiTokens;
@@ -62,5 +64,25 @@ class User extends Authenticatable
     public function photo()
     {
         return $this->morphOne(Photo::class, 'imageable');
+    }
+
+    public function isCustomer()
+    {
+        return $this->hasRole('normal-user');
+    }
+
+    public function isDriver()
+    {
+        return $this->hasRole('driver');
+    }
+
+    public function canAccessFilament(): bool
+    {
+        return $this->hasRole(['admin', 'super_admin']);
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->hasRole(['admin', 'super_admin']);
     }
 }

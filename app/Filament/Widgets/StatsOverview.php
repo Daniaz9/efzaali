@@ -93,5 +93,9 @@ class StatsOverview extends StatsOverviewWidget
             ->pluck('count')
             ->toArray();
     }
+    protected function getHeading(): ?string
+    {
+        return 'Analytics';
+    }
 }
 

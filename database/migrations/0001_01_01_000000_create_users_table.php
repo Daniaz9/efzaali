@@ -21,6 +21,8 @@ return new class extends Migration
         $table->timestamp('email_verified_at')->nullable();
         $table->string('password');
         $table->string('phone_number')->nullable();
+        $table->string('vehicle_type')->nullable(); // For drivers
+            $table->string('license_plate')->nullable(); // For drivers
         $table->rememberToken();
         $table->timestamps();
     });

@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Widgets\LowStockProducts;
+use App\Filament\Widgets\QuickActionsWidget;
 use App\Filament\Widgets\RecentProducts;
 use App\Filament\Widgets\StatsOverview;
 use Filament\Http\Middleware\Authenticate;
@@ -45,6 +46,7 @@ class AdminPanelProvider extends PanelProvider
                 FilamentInfoWidget::class,
                 RecentProducts::class,
                 LowStockProducts::class,
+
 //                RecentStores::class,
 //                RecentUsers::class,
             ])

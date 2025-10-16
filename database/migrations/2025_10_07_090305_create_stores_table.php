@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->string('address');
+            $table->boolean('is_active')->default(true);
 //            $table->string('logo');
             $table->timestamps();
         });

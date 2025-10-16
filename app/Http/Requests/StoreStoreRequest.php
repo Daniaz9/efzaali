@@ -26,6 +26,7 @@ class StoreStoreRequest extends FormRequest
             'description' => 'required|string',
             'address' => 'required|string|max:255',
             'logo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'is_active'=>'sometimes|boolean'
 
         ];
     }

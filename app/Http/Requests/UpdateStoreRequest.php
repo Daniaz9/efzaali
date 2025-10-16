@@ -26,6 +26,7 @@ class UpdateStoreRequest extends FormRequest
             'description' => 'sometimes|string',
             'logo' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
             'address' => 'sometimes|string|max:255',
+            'is_active'=>'sometimes|boolean'
         ];
     }
 }

@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('customer_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('driver_id')->constrained('users')->onDelete('cascade');
-            $table->string('type')->default(\App\Enums\OrderType::FAST);
+            $table->string('type')->default(\App\Enums\OrderType::CUSTOM);
+            $table->string('delivery_type')->default(\App\Enums\DeliveryType::FAST);
             $table->string('status')->default(\App\Enums\OrderStatus::PENDING);
             $table->string('pickup_address');
             $table->string('dropoff_address');
@@ -26,7 +27,15 @@ return new class extends Migration
             $table->decimal('distance', 8, 2);
             $table->decimal('delivery_fee', 8, 2);
             $table->decimal('total_price', 8, 2);
-            $table->text('description');
+            $table->text('description')->nullable();//for custom delivery
+//            $table->timestamp('confirmed_at')->nullable();
+            $table->timestamp('driver_assigned_at')->nullable();
+            $table->timestamp('preparing_at')->nullable();
+//            $table->timestamp('ready_for_pickup_at')->nullable();
+            $table->timestamp('picked_up_at')->nullable();
+            $table->timestamp('on_the_way_at')->nullable();
+            $table->timestamp('delivered_at')->nullable();
+            $table->timestamp('cancelled_at')->nullable();
             $table->timestamps();
         });
     }

@@ -11,6 +11,27 @@ class Order extends Model
 {
     /** @use HasFactory<\Database\Factories\OrderFactory> */
     use HasFactory;
+    protected $fillable = [
+        'type',
+        'delivery_type',
+        'status',
+        'pickup_address',
+        'dropoff_address',
+        'pickup_lat',
+        'pickup_long',
+        'dropoff_lat',
+        'dropoff_long',
+        'distance',
+        'delivery_fee',
+        'total_price',
+        'description',
+        'driver_assigned_at',
+        'preparing_at',
+        'picked_up_at',
+        'on_the_way_at',
+        'delivered_at',
+        'cancelled_at',
+    ];
 
     protected $guarded = [];
 

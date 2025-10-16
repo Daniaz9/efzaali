@@ -107,4 +107,5 @@ class LowStockProducts extends TableWidget
     {
         return Product::where('stock', '<', 10)->exists();
     }
+
 }
