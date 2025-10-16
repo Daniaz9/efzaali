@@ -20,7 +20,7 @@ return new class extends Migration
         $table->boolean('is_available')->default(0);//0=>unavailable , 1=>available
         $table->timestamp('email_verified_at')->nullable();
         $table->string('password');
-        $table->string('phone_number');
+        $table->string('phone_number')->nullable();
         $table->rememberToken();
         $table->timestamps();
     });
