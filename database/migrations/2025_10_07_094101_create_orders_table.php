@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('driver_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('driver_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->string('type')->default(\App\Enums\OrderType::CUSTOM);
             $table->string('delivery_type')->default(\App\Enums\DeliveryType::FAST);
             $table->string('status')->default(\App\Enums\OrderStatus::PENDING);

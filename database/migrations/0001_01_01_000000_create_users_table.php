@@ -23,6 +23,9 @@ return new class extends Migration
         $table->string('phone_number')->nullable();
         $table->string('vehicle_type')->nullable(); // For drivers
             $table->string('license_plate')->nullable(); // For drivers
+            $table->decimal('lat', 10, 7)->nullable();
+            $table->decimal('long', 10, 7)->nullable();
+            $table->string('address')->nullable();
         $table->rememberToken();
         $table->timestamps();
     });

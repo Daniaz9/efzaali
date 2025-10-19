@@ -9,6 +9,7 @@ enum OrderStatus: string
     case ON_THE_WAY  = 'on_the_way';
     case CANCELLED   = 'cancelled';
     case PENDING     = 'pending';
+    case ASSIGNED     = 'assigned';
 //    case PICKEDUP     = 'picked_up';
 //'ready_for_pickup',
 //'driver_assigned',

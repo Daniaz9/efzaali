@@ -15,8 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description');
-            $table->string('address');
             $table->boolean('is_active')->default(true);
+            $table->decimal('lat', 10, 7)->nullable();
+            $table->decimal('long', 10, 7)->nullable();
+            $table->string('address')->nullable();
+
 //            $table->string('logo');
             $table->timestamps();
         });

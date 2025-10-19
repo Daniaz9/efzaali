@@ -25,7 +25,10 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
-        'phone_number'
+        'phone_number',
+        'lat',
+        'long',
+        'address',
     ];
 
     /**
@@ -48,6 +51,8 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'lat' => 'float',
+            'long' => 'float',
         ];
     }
 
@@ -55,11 +60,11 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->hasMany(Order::class, 'customer_id');
     }
-
-    public function ordersAsDriver()
-    {
-        return $this->hasMany(Order::class, 'driver_id');
-    }
+//
+//    public function ordersAsDriver()
+//    {
+//        return $this->hasMany(Order::class, 'driver_id');
+//    }
 
     public function photo()
     {
@@ -76,13 +81,19 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasRole('driver');
     }
 
-    public function canAccessFilament(): bool
-    {
-        return $this->hasRole(['admin', 'super_admin']);
-    }
+//    public function canAccessFilament(): bool
+//    {
+//        return $this->hasRole(['admin', 'super_admin']);
+//    }
 
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->hasRole(['admin', 'super_admin']);
     }
+
+    public function offers()
+    {
+        return $this->hasMany(Offer::class);
+    }
+
 }

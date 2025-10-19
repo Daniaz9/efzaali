@@ -15,6 +15,14 @@ class Store extends Model
         'name',
         'description',
         'address',
+        'lat',
+        'long',
+        'address',
+    ];
+
+    protected $casts = [
+        'lat' => 'float',
+        'long' => 'float',
     ];
 
     protected $appends = [];
