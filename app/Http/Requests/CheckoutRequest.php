@@ -4,14 +4,14 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreCartItemRequest extends FormRequest
+class CheckoutRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,10 @@ class StoreCartItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'dropoff_address' => 'required|string|max:255',
+            'dropoff_lat' => 'required|numeric',
+            'dropoff_long' => 'required|numeric',
+            'description' => 'nullable|string|max:500',
         ];
     }
 }

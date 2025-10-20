@@ -53,4 +53,14 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    public function configure()
+    {
+        return $this->afterCreating(function (User $user) {
+            // Assign random role after user is created
+            $roles = ['normal-user', 'driver'];
+            $randomRole = $this->faker->randomElement($roles);
+            $user->assignRole($randomRole);
+        });
+    }
 }

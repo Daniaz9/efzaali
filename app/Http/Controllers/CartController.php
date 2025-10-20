@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CheckoutRequest;
 use App\Models\Cart;
 use App\Http\Requests\StoreCartRequest;
 use App\Http\Requests\UpdateCartRequest;
 use App\Services\CartService;
 use Illuminate\Http\Request;
-
 
 class CartController extends Controller
 {
@@ -21,19 +21,16 @@ class CartController extends Controller
     public function index(Request $request)
     {
         $cart = $this->cartService->getCartForUser($request->user());
-        if ($cart== null)
+
+        if ($cart === null) {
             return $this->sendResponse([], 'Your Cart is empty');
+        }
 
         return $this->sendResponse($cart, '');
     }
 
-    public function store(Request $request)
+    public function store(StoreCartRequest $request)
     {
-        $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'nullable|integer|min:1',
-        ]);
-
         $item = $this->cartService->addItem(
             $request->user(),
             $request->product_id,
@@ -43,13 +40,13 @@ class CartController extends Controller
         return $this->sendResponse($item, 'Item added to cart');
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateCartRequest $request, $id)
     {
-        $request->validate([
-            'quantity' => 'required|integer|min:0',
-        ]);
-
-        $item = $this->cartService->updateItem($request->user(), $id, $request->quantity);
+        $item = $this->cartService->updateItem(
+            $request->user(),
+            $id,
+            $request->quantity
+        );
 
         return $this->sendResponse($item, $item ? 'Item updated' : 'Item removed');
     }
@@ -57,18 +54,12 @@ class CartController extends Controller
     public function destroy(Request $request, $id)
     {
         $this->cartService->removeItem($request->user(), $id);
-        return $this->sendResponse([],'Item removed');
+
+        return $this->sendResponse([], 'Item removed');
     }
 
-    public function checkout(Request $request)
+    public function checkout(CheckoutRequest $request)
     {
-        $request->validate([
-            'dropoff_address' => 'required|string|max:255',
-            'dropoff_lat' => 'required|numeric',
-            'dropoff_long' => 'required|numeric',
-            'description' => 'nullable|string|max:500',
-        ]);
-
         $orders = $this->cartService->checkoutToOrder(
             $request->user(),
             [

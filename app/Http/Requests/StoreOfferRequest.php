@@ -11,7 +11,7 @@ class StoreOfferRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,8 @@ class StoreOfferRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'price' => 'required|numeric|min:1',
+            'note' => 'nullable|string|max:255',
         ];
     }
 }

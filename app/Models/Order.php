@@ -77,21 +77,21 @@ class Order extends Model
             ->whereNull('driver_id');
     }
 
-    public function acceptOffer(Offer $offer)
-    {
-        // transactional; assign driver, update status, mark offer accepted
-        DB::transaction(function() use ($offer) {
-            $this->driver_id = $offer->user_id;
-            $this->status = \App\Enums\OrderStatus::ASSIGNED;
-            $this->driver_assigned_at = now();
-            $this->save();
-
-            // mark offer accepted & others rejected
-            $this->offers()->update(['is_accepted' => false, 'rejected_at' => now()]);
-            $offer->is_accepted = true;
-            $offer->accepted_at = now();
-            $offer->rejected_at = null;
-            $offer->save();
-        });
-    }
+//    public function acceptOffer(Offer $offer)
+//    {
+//        // transactional; assign driver, update status, mark offer accepted
+//        DB::transaction(function() use ($offer) {
+//            $this->driver_id = $offer->user_id;
+//            $this->status = \App\Enums\OrderStatus::ASSIGNED;
+//            $this->driver_assigned_at = now();
+//            $this->save();
+//
+//            // mark offer accepted & others rejected
+//            $this->offers()->update(['is_accepted' => false, 'rejected_at' => now()]);
+//            $offer->is_accepted = true;
+//            $offer->accepted_at = now();
+//            $offer->rejected_at = null;
+//            $offer->save();
+//        });
+//    }
 }

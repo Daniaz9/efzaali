@@ -1,42 +1,55 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\OfferController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\StoreController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DriverController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StoreController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
-Route::apiResource('stores', StoreController::class);
-
-Route::apiResource('products', ProductController::class);
+// ----------------------------------------
+// Public Routes
+// ----------------------------------------
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
+Route::apiResource('stores', StoreController::class);
+Route::apiResource('products', ProductController::class);
+
+// ----------------------------------------
+// Authenticated Routes
+// ----------------------------------------
+
 Route::middleware('auth:sanctum')->group(function () {
+
     Route::post('logout', [AuthController::class, 'logout']);
-});
+    Route::get('user', function (Request $request) {
+        return $request->user();
+    });
 
-//Route::post('cart', [CartController::class, 'store']);
-//Route::put('/{id}', [CartController::class, 'update']);
-//Route::delete('/{id}', [CartController::class, 'destroy']);
-//Route::post('/checkout', [CartController::class, 'checkout']);
+    Route::prefix('cart')->controller(CartController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::put('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
+        Route::post('/checkout', 'checkout');
+    });
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/cart/', [CartController::class, 'index']);
-    Route::post('/cart/', [CartController::class, 'store']);
-    Route::put('/cart/{id}', [CartController::class, 'update']);
-    Route::delete('/cart/{id}', [CartController::class, 'destroy']);
-    Route::post('/cart/checkout', [CartController::class, 'checkout']);
+    Route::prefix('driver')->controller(DriverController::class)->group(function () {
+        Route::get('/orders/open', 'openOrders');
+        Route::get('/orders', 'myOrders');
+        Route::get('/offers', 'myOffers');
+        Route::post('/orders/{order}/status', 'updateStatus');
+        Route::post('/order/{order}/offer', 'storeOffer');
+    });
 
-    Route::post('/orders/{order}/offers', [OfferController::class, 'store']);
-    Route::get('/orders/{order}/offers', [OfferController::class, 'index']);
-    Route::post('/orders/{order}/offers/{offer}/accept', [OfferController::class, 'accept']);
-//    ->middleware('role:normal-user')
+    Route::prefix('customer')->controller(CustomerController::class)->group(function () {
+        Route::get('/orders', 'myOrders');
+        Route::get('/orders/{id}', 'showOrder');
+        Route::post('/orders/{order}/cancel', 'cancelOrder');
+        Route::post('/{order}/offer/{offer}/accept', 'accept');
+    });
 });

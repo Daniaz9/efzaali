@@ -30,7 +30,7 @@ return new class extends Migration
             $table->text('description')->nullable();//for custom delivery
 //            $table->timestamp('confirmed_at')->nullable();
             $table->timestamp('driver_assigned_at')->nullable();
-            $table->timestamp('preparing_at')->nullable();
+//            $table->timestamp('preparing_at')->nullable();
 //            $table->timestamp('ready_for_pickup_at')->nullable();
             $table->timestamp('picked_up_at')->nullable();
             $table->timestamp('on_the_way_at')->nullable();

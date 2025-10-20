@@ -32,21 +32,14 @@ class StatsOverview extends StatsOverviewWidget
                 ->chart($this->getProductGrowthChart())
                 ->url(route('filament.admin.resources.products.index')),
 
-            // Total Users
-            Stat::make('Total Users', User::count())
-                ->description('Registered users')
-                ->descriptionIcon('heroicon-m-user-group')
-                ->color('info')
-                ->chart($this->getUserGrowthChart())
-                ->url(route('filament.admin.resources.users.index')),
-
-            // Total Orders (if you have Order model)
-//            Stat::make('Total Orders', Order::count() ?? 0)
-//                ->description('All time orders')
-//                ->descriptionIcon('heroicon-m-shopping-bag')
-//                ->color('primary')
-////                ->chart($this->getOrderGrowthChart())
+            // Total Orders
+            Stat::make('Total Orders', Order::count() ?? 0)
+                ->description('All time orders')
+                ->descriptionIcon('heroicon-m-shopping-bag')
+                ->color('primary')
+                ->chart($this->getOrderGrowthChart()),
 //                ->url(route('filament.admin.resources.orders.index')), // Adjust if you have orders
+
             Stat::make('Low Stock Products', Product::where('stock', '<', 10)->count())
                 ->description('Need immediate attention')
                 ->descriptionIcon('heroicon-m-exclamation-triangle')
@@ -54,6 +47,30 @@ class StatsOverview extends StatsOverviewWidget
                 ->url(route('filament.admin.resources.products.index', [
                     'tableFilters' => [
                         'low_stock' => ['value' => true]
+                    ]
+                ])),
+
+            //Total drivers
+            Stat::make('Total Drivers', User::role('driver')->count())
+                ->description('Registered drivers')
+                ->descriptionIcon('heroicon-m-truck')
+                ->color('info')
+                ->chart($this->getDriverGrowthChart())
+                ->url(route('filament.admin.resources.users.index', [
+                    'tableFilters' => [
+                        'role' => ['value' => 'driver']
+                    ]
+                ])),
+
+            //Total customers
+            Stat::make('Total Customers', User::role('normal-user')->count())
+                ->description('Registered customers')
+                ->descriptionIcon('heroicon-m-users')
+                ->color('info')
+                ->chart($this->getDriverGrowthChart())
+                ->url(route('filament.admin.resources.users.index', [
+                    'tableFilters' => [
+                        'role' => ['value' => 'normal-user']
                     ]
                 ])),
         ];
@@ -82,10 +99,11 @@ class StatsOverview extends StatsOverviewWidget
             ->toArray();
     }
 
-    protected function getUserGrowthChart(): array
+    protected function getDriverGrowthChart(): array
     {
-        // Last 7 days user growth
-        return User::where('created_at', '>=', now()->subDays(7))
+        // Last 7 days driver growth
+        return User::role('driver')
+            ->where('created_at', '>=', now()->subDays(7))
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')
             ->orderBy('date')
@@ -93,9 +111,39 @@ class StatsOverview extends StatsOverviewWidget
             ->pluck('count')
             ->toArray();
     }
+
+    protected function getCustomerGrowthChart(): array
+    {
+        // Last 7 days customer growth
+        return User::role('normal-user')
+            ->where('created_at', '>=', now()->subDays(7))
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count')
+            ->toArray();
+    }
+
     protected function getHeading(): ?string
     {
         return 'Analytics';
+    }
+
+    protected function getOrderGrowthChart(): array
+    {
+        // Last 7 days order growth
+        if (class_exists(Order::class)) {
+            return Order::where('created_at', '>=', now()->subDays(7))
+                ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get()
+                ->pluck('count')
+                ->toArray();
+        }
+
+        return [0, 0, 0, 0, 0, 0, 0];
     }
 }
 
