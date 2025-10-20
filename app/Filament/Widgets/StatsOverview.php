@@ -32,14 +32,6 @@ class StatsOverview extends StatsOverviewWidget
                 ->chart($this->getProductGrowthChart())
                 ->url(route('filament.admin.resources.products.index')),
 
-            // Total Orders
-            Stat::make('Total Orders', Order::count() ?? 0)
-                ->description('All time orders')
-                ->descriptionIcon('heroicon-m-shopping-bag')
-                ->color('primary')
-                ->chart($this->getOrderGrowthChart()),
-//                ->url(route('filament.admin.resources.orders.index')), // Adjust if you have orders
-
             Stat::make('Low Stock Products', Product::where('stock', '<', 10)->count())
                 ->description('Need immediate attention')
                 ->descriptionIcon('heroicon-m-exclamation-triangle')
@@ -49,6 +41,14 @@ class StatsOverview extends StatsOverviewWidget
                         'low_stock' => ['value' => true]
                     ]
                 ])),
+
+            // Total Orders
+            Stat::make('Total Orders', Order::count() ?? 0)
+                ->description('All time orders')
+                ->descriptionIcon('heroicon-m-shopping-bag')
+                ->color('primary')
+                ->chart($this->getOrderGrowthChart()),
+//                ->url(route('filament.admin.resources.orders.index')), // Adjust if you have orders
 
             //Total drivers
             Stat::make('Total Drivers', User::role('driver')->count())

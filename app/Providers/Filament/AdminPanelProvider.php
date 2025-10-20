@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\UserResource\Pages\Driverss;
+use App\Filament\Resources\Users\UserResource;
 use App\Filament\Widgets\LowStockProducts;
 use App\Filament\Widgets\QuickActionsWidget;
 use App\Filament\Widgets\RecentProducts;
@@ -43,12 +45,10 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
-                FilamentInfoWidget::class,
+//                FilamentInfoWidget::class,
                 RecentProducts::class,
                 LowStockProducts::class,
 
-//                RecentStores::class,
-//                RecentUsers::class,
             ])
             ->middleware([
                 EncryptCookies::class,

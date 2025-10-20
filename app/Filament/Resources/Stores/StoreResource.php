@@ -18,7 +18,9 @@ class StoreResource extends Resource
 {
     protected static ?string $model = Store::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront
+
+    ;
 
     public static function form(Schema $schema): Schema
     {
