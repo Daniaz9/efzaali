@@ -8,6 +8,7 @@ use App\Filament\Widgets\LowStockProducts;
 use App\Filament\Widgets\QuickActionsWidget;
 use App\Filament\Widgets\RecentProducts;
 use App\Filament\Widgets\StatsOverview;
+use App\Filament\Widgets\UserRegistrationsChart;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -48,6 +49,8 @@ class AdminPanelProvider extends PanelProvider
 //                FilamentInfoWidget::class,
                 RecentProducts::class,
                 LowStockProducts::class,
+                UserRegistrationsChart::class,
+
 
             ])
             ->middleware([

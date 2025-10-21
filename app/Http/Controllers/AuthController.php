@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -26,11 +27,11 @@ class AuthController extends Controller
             'phone_number' => $validated['phone_number'],
             'is_available' => $validated['is_available'] ?? 0,
         ]);
+
         $user->assignRole('normal-user');
 
         if ($request->hasFile('photo')) {
             $avatarPath = $request->file('photo')->store('photos/avatars', 'public');
-
             $this->createSmallImage($avatarPath);
 
             $user->photo()->create([
@@ -45,13 +46,13 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return $this->sendResponse([
-            'user' => $user->load('photo'),
-            'roles' => $user->getRoleNames(),
-            'token' => $token,
-            'token_type' => 'Bearer'
-        ], 'User registered successfully');
+        $user->load('photo', 'roles');
 
+        return $this->sendResponse([
+            'user' => new UserResource($user),
+            'token' => $token,
+            'token_type' => 'Bearer',
+        ], 'User registered successfully');
     }
 
     public function login(LoginRequest $request)
@@ -67,9 +68,9 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $this->sendResponse([
-            'user' => $user->load('photo'),
+            'user' => new UserResource($user),
             'token' => $token,
-            'token_type' => 'Bearer'
+            'token_type' => 'Bearer',
         ], 'User logged in successfully');
     }
 

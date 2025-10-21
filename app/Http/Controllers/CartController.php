@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CheckoutRequest;
-use App\Models\Cart;
 use App\Http\Requests\StoreCartRequest;
 use App\Http\Requests\UpdateCartRequest;
+use App\Http\Requests\CheckoutRequest;
+use App\Http\Resources\CartResource;
+use App\Http\Resources\CartItemResource;
 use App\Services\CartService;
 use Illuminate\Http\Request;
 
@@ -22,11 +23,16 @@ class CartController extends Controller
     {
         $cart = $this->cartService->getCartForUser($request->user());
 
-        if ($cart === null) {
-            return $this->sendResponse([], 'Your Cart is empty');
+        if (!$cart) {
+            return $this->sendResponse([], 'Your cart is empty');
         }
 
-        return $this->sendResponse($cart, '');
+        $cart->load('items.product.store.photo', 'items.product.photos');
+
+        return $this->sendResponse(
+            new CartResource($cart),
+            'Cart retrieved successfully'
+        );
     }
 
     public function store(StoreCartRequest $request)
@@ -37,7 +43,12 @@ class CartController extends Controller
             $request->quantity ?? 1
         );
 
-        return $this->sendResponse($item, 'Item added to cart');
+        $item->load('product.store.photo', 'product.photos');
+
+        return $this->sendResponse(
+            new CartItemResource($item),
+            'Item added to cart'
+        );
     }
 
     public function update(UpdateCartRequest $request, $id)
@@ -48,14 +59,23 @@ class CartController extends Controller
             $request->quantity
         );
 
-        return $this->sendResponse($item, $item ? 'Item updated' : 'Item removed');
+        if (!$item) {
+            return $this->sendResponse([], 'Item removed');
+        }
+
+        $item->load('product.store.photo', 'product.photos');
+
+        return $this->sendResponse(
+            new CartItemResource($item),
+            'Item updated'
+        );
     }
 
     public function destroy(Request $request, $id)
     {
         $this->cartService->removeItem($request->user(), $id);
 
-        return $this->sendResponse([], 'Item removed');
+        return $this->sendResponse([], 'Item removed from cart');
     }
 
     public function checkout(CheckoutRequest $request)

@@ -13,6 +13,8 @@ class Order extends Model
     /** @use HasFactory<\Database\Factories\OrderFactory> */
     use HasFactory;
     protected $fillable = [
+        'customer_id',
+        'driver_id',
         'type',
         'delivery_type',
         'status',

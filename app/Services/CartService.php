@@ -126,7 +126,9 @@ class CartService
             // Empty the cart
             $cart->items()->delete();
 
-            return $createdOrders->load('products.product.store', 'customer');
+            return $createdOrders->map(function ($order) {
+                return $order->load('products.store', 'customer');
+            });
         });
     }
 

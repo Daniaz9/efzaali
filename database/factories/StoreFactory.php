@@ -20,9 +20,11 @@ class StoreFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->company(),
-            'description' => $this->faker->paragraph(),
-//            'logo' => $this->faker->imageUrl(200, 200, 'business', true, 'logo'),
+            'name' => $this->faker->company,
+            'description' => $this->faker->sentence(10),
+            'is_active' => $this->faker->boolean(90),
+            'lat' => $this->faker->latitude(),
+            'long' => $this->faker->longitude(),
             'address' => $this->faker->address(),
         ];
     }

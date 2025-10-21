@@ -24,8 +24,8 @@ return new class extends Migration
             $table->decimal('pickup_long', 10, 7);
             $table->decimal('dropoff_lat', 10, 7);
             $table->decimal('dropoff_long', 10, 7);
-            $table->decimal('distance', 8, 2);
-            $table->decimal('delivery_fee', 8, 2);
+            $table->decimal('distance', 8, 2)->nullable();
+            $table->decimal('delivery_fee', 8, 2)->nullable();
             $table->decimal('total_price', 8, 2);
             $table->text('description')->nullable();//for custom delivery
 //            $table->timestamp('confirmed_at')->nullable();

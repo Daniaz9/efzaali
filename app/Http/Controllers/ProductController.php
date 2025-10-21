@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Traits\HandlesImages;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -16,10 +18,15 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with(['store','photos'])->get();
-        return $this->sendResponse($products, 'all products retrieved');
+        $perPage = $request->get('per_page', 10);
+        $products = Product::with(['store.photo', 'photos'])->paginate($perPage);
+
+        return $this->sendResponse(
+            ProductResource::collection($products)->response()->getData(true),
+            'Products retrieved successfully'
+        );
     }
 
     /**
@@ -31,36 +38,35 @@ class ProductController extends Controller
         $product = Product::create($validated);
 
         if ($request->hasFile('photos')) {
-            $photoFiles = $request->file('photos');
-
-            foreach ($photoFiles as $photoFile) {
-                if (! $photoFile->isValid()) {
-                    continue;
-                }
+            foreach ($request->file('photos') as $photoFile) {
+                if (!$photoFile->isValid()) continue;
 
                 $path = $photoFile->store('photos/products', 'public');
+                $this->createSmallImage($path);
 
-                if (! Storage::disk('public')->exists($this->getSmallImagePath($path))) {
-                    $this->createSmallImage($path);
-                }
-
-                $product->photos()->create([
-                    'path' => $path,
-                ]);
+                $product->photos()->create(['path' => $path]);
             }
         }
 
-        $product->load('photos', 'store','store.photo');
+        $product->load('photos', 'store.photo');
 
-        return $this->sendResponse($product, 'Product created successfully');
+        return $this->sendResponse(
+            new ProductResource($product),
+            'Product created successfully'
+        );
     }
+
     /**
      * Display the specified resource.
      */
     public function show(Product $product)
     {
-        $product->load('store.photo','photos');
-        return $this->sendResponse($product, 'product details retrieved');
+        $product->load('store.photo', 'photos');
+
+        return $this->sendResponse(
+            new ProductResource($product),
+            'Product details retrieved'
+        );
     }
 
     /**
@@ -70,14 +76,13 @@ class ProductController extends Controller
     {
         $validated = $request->validated();
 
-
         if (!empty($validated)) {
             $product->update($validated);
         }
 
         if ($request->hasFile('photos')) {
             foreach ($product->photos as $oldPhoto) {
-                $this->deleteImageAndSmall($oldPhoto->path);
+                $this->deleteImageAndSmall($oldPhoto->getRawOriginal('path'));
                 $oldPhoto->delete();
             }
 
@@ -85,27 +90,27 @@ class ProductController extends Controller
                 if (!$photoFile->isValid()) continue;
 
                 $path = $photoFile->store('photos/products', 'public');
+                $this->createSmallImage($path);
 
-                if (!Storage::disk('public')->exists($this->getSmallImagePath($path))) {
-                    $this->createSmallImage($path);
-                }
-
-                $product->photos()->create([
-                    'path' => $path,
-                ]);
+                $product->photos()->create(['path' => $path]);
             }
         }
+
         $product->load('photos', 'store.photo');
 
-        return $this->sendResponse($product, 'Product updated successfully');
+        return $this->sendResponse(
+            new ProductResource($product),
+            'Product updated successfully'
+        );
     }
 
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(Product $product)
     {
-        // delete all related photos (files + DB rows)
         foreach ($product->photos as $photo) {
-            $raw = $photo->getRawOriginal('path'); // raw DB value
-            $this->deleteImageAndSmall($raw);
+            $this->deleteImageAndSmall($photo->getRawOriginal('path'));
             $photo->delete();
         }
 

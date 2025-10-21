@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\StoreResource;
 use App\Models\Store;
 use App\Http\Requests\StoreStoreRequest;
 use App\Http\Requests\UpdateStoreRequest;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\HandlesImages;
+use Illuminate\Http\Request;
 
 
 class StoreController extends Controller
@@ -18,8 +20,12 @@ class StoreController extends Controller
      */
     public function index()
     {
-        $stores=Store::all();
-        return $this->sendResponse($stores->load('photo'),'all stores retrieved');
+        $stores = Store::with('photo')->paginate(10);
+
+        return $this->sendResponse(
+            StoreResource::collection($stores)->response()->getData(true),
+            'Stores retrieved successfully'
+        );
     }
 
     /**
@@ -32,13 +38,9 @@ class StoreController extends Controller
         $store = Store::create($validated);
 
         if ($request->hasFile('logo')) {
-            // Store main image
             $filePath = $request->file('logo')->store('photos/stores', 'public');
-
-            // Create the small version
             $this->createSmallImage($filePath);
 
-            // Attach one photo record to the store
             $store->photo()->create([
                 'path' => $filePath,
             ]);
@@ -46,18 +48,27 @@ class StoreController extends Controller
 
         $store->load('photo');
 
-        return $this->sendResponse($store, 'Store created successfully');
+        return $this->sendResponse(
+            new StoreResource($store), 'Store created successfully'
+        );
     }
 
 
     /**
      * Display the specified resource.
      */
-    public function show(Store $store)
+    public function show(Request $request, Store $store)
     {
-//        if (!$store)
-//            return $this->sendError('');
-        return $this->sendResponse($store->load('photo','products'),'store details retrieved');
+        $store->load('photo'); // Load only photo normally
+
+        // Paginate related products (e.g., 10 per page or user-defined)
+        $perPage = $request->get('per_page', 10);
+        $products = $store->products()->paginate($perPage);
+
+        return $this->sendResponse([
+            'store' => new StoreResource($store),
+            'products' => $products, // includes pagination metadata
+        ], 'Store details retrieved');
     }
 
     /**
@@ -65,7 +76,6 @@ class StoreController extends Controller
      */
     public function update(UpdateStoreRequest $request, Store $store)
     {
-        $validated = $request->validated();
 
         if ($request->hasFile('logo')) {
             if ($store->photo) {
@@ -74,12 +84,9 @@ class StoreController extends Controller
             }
 
             $path = $request->file('logo')->store('photos/stores', 'public');
-
             $this->createSmallImage($path);
 
-            $store->photo()->create([
-                'path' => $path,
-            ]);
+            $store->photo()->create(['path' => $path]);
         }
 
         if (!empty($validated)) {
@@ -88,7 +95,9 @@ class StoreController extends Controller
 
         $store->load('photo');
 
-        return $this->sendResponse($store, 'Store updated successfully');
+        return $this->sendResponse(
+            new StoreResource($store), 'Store updated successfully'
+        );
     }
 
     /**
@@ -96,10 +105,10 @@ class StoreController extends Controller
      */
     public function destroy(Store $store)
     {
-        // Get the photo path from the relationship
+
         if ($store->photo) {
             $this->deleteImageAndSmall($store->photo->path);
-            $store->photo()->delete(); // Also delete the photo record
+            $store->photo()->delete();
         }
 
         $store->delete();
