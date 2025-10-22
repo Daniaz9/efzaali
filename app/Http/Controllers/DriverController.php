@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreOfferRequest;
+use App\Http\Resources\OfferResource;
+use App\Http\Resources\OrderResource;
 use App\Models\Offer;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -18,7 +20,8 @@ class DriverController extends Controller
         if ($orders->isEmpty()) {
             return $this->sendResponse([], 'no orders available');
         }
-        return $this->sendResponse($orders,'');
+        return OrderResource::collection($orders)
+            ->additional(['message' => "List of available orders", 'success' => true]);
     }
 
     public function myOffers(Request $request)
@@ -30,7 +33,8 @@ class DriverController extends Controller
             ->latest()
             ->paginate(10);
 
-        return $this->sendResponse($offers,"");
+        return OfferResource::collection($offers)
+            ->additional(['message' => "List of driver's offers", 'success' => true]);
     }
 
     public function myOrders(Request $request)
@@ -38,11 +42,12 @@ class DriverController extends Controller
         $driver = $request->user();
 
         $orders = Order::where('driver_id', $driver->id)
-            ->with('customer', 'products.product.store')
+            ->with('customer', 'products.store')
             ->latest()
             ->paginate(10);
 
-        return $this->sendResponse($orders,"");
+        return OrderResource::collection($orders)
+            ->additional(['message' => "List of driver's orders", 'success' => true]);
     }
 
     public function storeOffer(StoreOfferRequest $request, $orderId)
@@ -61,10 +66,12 @@ class DriverController extends Controller
             'order_id' => $orderId,
             'user_id' => auth()->id(),
             'price' => $request->price,
-            'note' => $request->note,
+            'average_delivery_time'=> $request->average_delivery_time ,
+            'message' => $request->message,
         ]);
+        $offer->load('driver','order');
 
-        return $this->sendResponse(['offer' => $offer->load('driver')],'');
+        return $this->sendResponse(new OfferResource($offer),'Offer submitted successfully');
     }
 
     public function updateStatus(Request $request, $orderId)
@@ -75,8 +82,8 @@ class DriverController extends Controller
             ->where('driver_id', $driver->id)
             ->first();
 
-        if ($order== null) {
-            return $this->sendResponse([], 'the order canceled or deleted');
+        if ($order == null) {
+            return $this->sendResponse([], 'The order was canceled or deleted');
         }
 
         $request->validate([
@@ -91,9 +98,27 @@ class DriverController extends Controller
 
         $timestampField = $statusMap[$request->status];
         $order->$timestampField = now();
-        $order->status = strtoupper($request->status);
+        $order->status = $request->status; // ✅ Fix: don’t uppercase it
         $order->save();
 
-        return $this->sendResponse($order,'Order status updated');
+        return $this->sendResponse(new OrderResource($order), 'Order status updated');
+    }
+
+    public function changeAvailability(Request $request)
+    {
+        $request->validate([
+            'is_available' => 'required|boolean',
+        ]);
+
+        $driver = auth()->user();
+        $driver->update([
+            'is_available' => $request->is_available,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Availability status updated',
+            'is_available' => $driver->is_available,
+        ]);
     }
 }

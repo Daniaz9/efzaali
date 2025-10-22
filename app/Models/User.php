@@ -29,6 +29,7 @@ class User extends Authenticatable implements FilamentUser
         'lat',
         'long',
         'address',
+        'is_available'
     ];
 
     /**
@@ -94,6 +95,27 @@ class User extends Authenticatable implements FilamentUser
     public function offers()
     {
         return $this->hasMany(Offer::class);
+    }
+
+    public function givenRatings()
+    {
+        return $this->hasMany(Rating::class, 'rater_id');
+    }
+
+    public function receivedRatings()
+    {
+        return $this->hasMany(Rating::class, 'ratee_id');
+    }
+
+    public function ratingStats(): array
+    {
+        $average = $this->receivedRatings()->avg('stars') ?? 0; // default to 0 if no ratings
+        $count = $this->receivedRatings()->count();
+
+        return [
+            'avg' => round($average, 2),
+            'count' => $count,
+        ];
     }
 
 }

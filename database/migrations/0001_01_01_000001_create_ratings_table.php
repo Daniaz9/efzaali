@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('ratings', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('order_id')->constrained()->onDelete('cascade'); // which order
+            $table->foreignId('rater_id')->constrained('users')->onDelete('cascade'); // who gives rating
+            $table->foreignId('ratee_id')->constrained('users')->onDelete('cascade'); // who receives rating
+            $table->tinyInteger('stars'); // e.g., 1-5
+            $table->text('comment')->nullable();
             $table->timestamps();
         });
     }

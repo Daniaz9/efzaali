@@ -2,65 +2,41 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\Rating;
 use App\Http\Requests\StoreRatingRequest;
 use App\Http\Requests\UpdateRatingRequest;
+use Illuminate\Http\Request;
 
 class RatingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function rateUser(StoreRatingRequest $request, $orderId)
     {
-        //
+
+        $user = $request->user();
+        $order = Order::findOrFail($orderId);
+
+        $rateeId = $request->ratee_type === 'driver'
+            ? $order->driver_id
+            : $order->customer_id;
+
+        if (!$rateeId) {
+            return $this->sendError('User to rate not found.');
+        }
+
+        $rating = Rating::updateOrCreate(
+            [
+                'order_id' => $order->id,
+                'rater_id' => $user->id,
+                'ratee_id' => $rateeId,
+            ],
+            [
+                'stars' => $request->stars,
+                'comment' => $request->comment,
+            ]
+        );
+
+        return $this->sendResponse($rating,'Rating submitted successfully');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreRatingRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Rating $rating)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Rating $rating)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateRatingRequest $request, Rating $rating)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Rating $rating)
-    {
-        //
-    }
 }

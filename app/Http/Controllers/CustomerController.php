@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\OrderResource;
+use App\Models\Offer;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,28 +15,32 @@ class CustomerController extends Controller
         $customer = $request->user();
 
         $orders = Order::where('customer_id', $customer->id)
-            ->with('products.product.store', 'driver')
+            ->with('products.store', 'driver')
             ->latest()
             ->paginate(10);
 
-        return $this->sendResponse($orders,'');
-    }
+        return OrderResource::collection($orders)
+            ->additional(['message' => "List of customer orders", 'success' => true]);    }
 
     public function showOrder(Request $request, $id)
     {
         $customer = $request->user();
 
         $order = Order::where('customer_id', $customer->id)
-            ->with('offers.driver', 'products.product.store')
+            ->with('offers.driver', 'products.store','driver')
             ->findOrFail($id);
 
-        return $this->sendResponse($order,'');
+        return $this->sendResponse(new OrderResource($order),'');
     }
 
-    public function accept($orderId, $offerId)
+    public function accept($offerId)
     {
-        $order = Order::findOrFail($orderId);
-        $offer = $order->offers()->findOrFail($offerId);
+        $offer = Offer::with('order')->findOrFail($offerId);
+        $order = $offer->order;
+
+        if (!$order) {
+            return $this->sendError('Offer has no associated order', 404);
+        }
 
         if ($order->driver_id) {
             return $this->sendError('Order already assigned to a driver');
@@ -49,13 +55,16 @@ class CustomerController extends Controller
                 'driver_assigned_at' => now(),
             ]);
 
-            $order->offers()->where('id', '!=', $offer->id)
+            $order->offers()
+                ->where('id', '!=', $offer->id)
                 ->update(['is_accepted' => false, 'rejected_at' => now()]);
 
             $offer->update(['is_accepted' => true, 'accepted_at' => now()]);
         });
 
-        return $this->sendResponse($order->load('driver', 'offers.driver'),'Offer accepted successfully');
+        $order->load('driver', 'offers.driver');
+
+        return $this->sendResponse(new OrderResource($order), 'Offer accepted successfully');
     }
 
     public function cancelOrder(Request $request, $id)

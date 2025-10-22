@@ -19,14 +19,13 @@ return new class extends Migration
             $table->string('delivery_type')->default(\App\Enums\DeliveryType::FAST);
             $table->string('status')->default(\App\Enums\OrderStatus::PENDING);
             $table->string('pickup_address');
-            $table->string('dropoff_address');
+            $table->string('dropoff_address')->nullable();
             $table->decimal('pickup_lat', 10, 7);
             $table->decimal('pickup_long', 10, 7);
-            $table->decimal('dropoff_lat', 10, 7);
-            $table->decimal('dropoff_long', 10, 7);
-            $table->decimal('distance', 8, 2)->nullable();
+            $table->decimal('dropoff_lat', 10, 7)->nullable();
+            $table->decimal('dropoff_long', 10, 7)->nullable();
             $table->decimal('delivery_fee', 8, 2)->nullable();
-            $table->decimal('total_price', 8, 2);
+            $table->decimal('total_price', 8, 2)->nullable();
             $table->text('description')->nullable();//for custom delivery
 //            $table->timestamp('confirmed_at')->nullable();
             $table->timestamp('driver_assigned_at')->nullable();

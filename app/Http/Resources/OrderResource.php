@@ -12,11 +12,12 @@ class OrderResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray($request)
     {
         return [
             'id' => $this->id,
-            'customer' => new UserResource($this->customer),
+            'customer' => new UserResource($this->whenLoaded('customer')),
+            'driver' => new UserResource($this->whenLoaded('driver')),
             'type' => $this->type,
             'delivery_type' => $this->delivery_type,
             'status' => $this->status,
@@ -29,8 +30,21 @@ class OrderResource extends JsonResource
             'delivery_fee' => $this->delivery_fee,
             'total_price' => $this->total_price,
             'description' => $this->description,
-            'products' => ProductResource::collection($this->whenLoaded('products')),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-        ];    }
+
+            // Combine all products into "items"
+            'items' => $this->whenLoaded('products', function () {
+                return $this->products->map(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'price' => $product->price,
+                        'description' => $product->description,
+                        'quantity' => $product->pivot->quantity,
+                        'total_price' => $product->pivot->total_price,
+                        'store' => new StoreResource($product->store),
+                    ];
+                });
+            }),
+        ];
+    }
 }

@@ -22,10 +22,15 @@ class CheckoutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'dropoff_address' => 'required|string|max:255',
-            'dropoff_lat' => 'required|numeric',
-            'dropoff_long' => 'required|numeric',
-            'description' => 'nullable|string|max:500',
+            'delivery_type' => 'required|in:store,custom',
+            'use_saved_location' => 'boolean',
+            'dropoff_address' => 'required_if:use_saved_location,false|string',
+            'dropoff_lat' => 'required_if:use_saved_location,false|numeric',
+            'dropoff_long' => 'required_if:use_saved_location,false|numeric',
+            'pickup_address' => 'required_if:delivery_type,custom|string',
+            'pickup_lat' => 'required_if:delivery_type,custom|numeric',
+            'pickup_long' => 'required_if:delivery_type,custom|numeric',
+            'description' => 'sometimes|string'
         ];
     }
 }

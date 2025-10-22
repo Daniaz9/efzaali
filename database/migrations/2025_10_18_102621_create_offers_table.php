@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('offers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // driver
-            $table->decimal('price', 8, 2)->nullable(); // price proposed
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->decimal('price', 8, 2);
             $table->text('message')->nullable();
+            $table->time('average_delivery_time');
             $table->boolean('is_accepted')->default(false);
             $table->timestamp('accepted_at')->nullable();
             $table->timestamp('rejected_at')->nullable();

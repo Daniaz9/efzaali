@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateCartRequest;
 use App\Http\Requests\CheckoutRequest;
 use App\Http\Resources\CartResource;
 use App\Http\Resources\CartItemResource;
+use App\Http\Resources\OrderResource;
 use App\Services\CartService;
 use Illuminate\Http\Request;
 
@@ -23,18 +24,21 @@ class CartController extends Controller
     {
         $cart = $this->cartService->getCartForUser($request->user());
 
-        if (!$cart) {
+        if (!$cart || $cart->items->isEmpty()) {
             return $this->sendResponse([], 'Your cart is empty');
         }
 
-        $cart->load('items.product.store.photo', 'items.product.photos');
+        // Paginate cart items (e.g., 10 per page)
+        $perPage = $request->query('per_page', 10);
+
+        $paginatedItems = $cart->items()->with('product.store', 'product.photos')
+            ->paginate($perPage);
 
         return $this->sendResponse(
-            new CartResource($cart),
+            CartItemResource::collection($paginatedItems)->response()->getData(true),
             'Cart retrieved successfully'
         );
     }
-
     public function store(StoreCartRequest $request)
     {
         $item = $this->cartService->addItem(
@@ -80,16 +84,51 @@ class CartController extends Controller
 
     public function checkout(CheckoutRequest $request)
     {
-        $orders = $this->cartService->checkoutToOrder(
-            $request->user(),
-            [
-                'address' => $request->dropoff_address,
-                'lat' => $request->dropoff_lat,
-                'long' => $request->dropoff_long,
-            ],
-            ['description' => $request->description ?? null]
-        );
+        $user = $request->user();
+        $perPage = $request->query('per_page', 10);
+        $deliveryType = $request->delivery_type; // store or custom
+        $useSaved = $request->boolean('use_saved_location', false);
 
-        return $this->sendResponse($orders, 'Checkout completed successfully');
+        // Determine dropoff location
+        $dropoff = $useSaved
+            ? [
+                'address' => $user->address,
+                'lat'     => $user->lat,
+                'long'    => $user->long,
+            ]
+            : [
+                'address' => $request->dropoff_address,
+                'lat'     => $request->dropoff_lat,
+                'long'    => $request->dropoff_long,
+            ];
+
+        if ($deliveryType === 'store') {
+            // Store delivery uses cart
+            $paginatedOrders = $this->cartService->checkoutStoreOrder(
+                $user,
+                $dropoff,
+                ['description' => $request->description ?? null],
+                $perPage
+            );
+        } else {
+            // Custom delivery does not use cart
+            $paginatedOrders = $this->cartService->checkoutCustomDelivery(
+                $user,
+                $dropoff,
+                [
+                    'description'   => $request->description ?? null,
+                    'pickup_address'=> $request->pickup_address,
+                    'pickup_lat'    => $request->pickup_lat,
+                    'pickup_long'   => $request->pickup_long,
+                ],
+                $perPage
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Checkout completed successfully',
+            'orders'  => OrderResource::collection($paginatedOrders),
+        ]);
     }
 }

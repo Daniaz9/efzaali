@@ -11,7 +11,7 @@ class StoreRatingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,9 @@ class StoreRatingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'stars' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:500',
+            'ratee_type' => 'required|in:driver,customer',
         ];
     }
 }

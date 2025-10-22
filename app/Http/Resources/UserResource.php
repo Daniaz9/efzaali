@@ -24,6 +24,7 @@ class UserResource extends JsonResource
                 'small_path' => $this->photo->small_path,
             ] : null,
             'roles' => $this->roles->pluck('name'),
+            'rating' => $this->ratingStats()['avg'],
         ];
     }
 }

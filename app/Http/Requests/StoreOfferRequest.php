@@ -23,7 +23,7 @@ class StoreOfferRequest extends FormRequest
     {
         return [
             'price' => 'required|numeric|min:1',
-            'note' => 'nullable|string|max:255',
+            'message' => 'nullable|string|max:255',
         ];
     }
 }

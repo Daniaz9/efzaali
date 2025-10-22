@@ -78,64 +78,70 @@ class CartService
      * @param  array  $extra (e.g., description)
      * @return \App\Models\Order
      */
-    public function checkoutToOrder($user, array $dropoff, array $extra = [])
+    public function checkoutStoreOrder($user, array $dropoff, array $extra = [], int $perPage = 10)
     {
         $cart = $this->getCartForUser($user);
+
         if (!$cart || $cart->items->isEmpty()) {
             throw new \Exception('Cart is empty');
         }
 
-        // Group cart items by store
-        $groups = $cart->items->groupBy(fn($item) => $item->product->store_id);
+        $order = DB::transaction(function () use ($user, $cart, $dropoff, $extra) {
+            $total = $cart->items->sum(fn($item) => $item->quantity * $item->price);
 
-        return DB::transaction(function () use ($user, $groups, $dropoff,  $extra, $cart) {
-            $createdOrders = collect();
+            $order = Order::create([
+                'customer_id' => $user->id,
+                'type' => \App\Enums\OrderType::STORE,
+                'delivery_type' => \App\Enums\DeliveryType::SLOW,
+                'status' => \App\Enums\OrderStatus::PENDING,
+                'pickup_address' => $cart->items->first()->product->store->address,
+                'pickup_lat' => $cart->items->first()->product->store->lat,
+                'pickup_long' => $cart->items->first()->product->store->long,
+                'dropoff_address' => $dropoff['address'],
+                'dropoff_lat' => $dropoff['lat'],
+                'dropoff_long' => $dropoff['long'],
+                'delivery_fee' => null,
+                'total_price' => $total,
+                'description' => $extra['description'] ?? null,
+            ]);
 
-            foreach ($groups as $storeId => $items) {
-                $store = $items->first()->product->store;
-
-                $subtotal = $items->sum(fn($i) => $i->quantity * $i->price);
-//                $fee = $this->calculateDeliveryFee($store, $dropoff);
-
-                $order = \App\Models\Order::create([
-                    'customer_id' => $user->id,
-                    'type' => \App\Enums\OrderType::STORE,
-                    'delivery_type' => \App\Enums\DeliveryType::SLOW,
-                    'status' => \App\Enums\OrderStatus::PENDING,
-                    'pickup_address' => $store->address,
-                    'dropoff_address' => $dropoff['address'],
-                    'pickup_lat' => $store->lat,
-                    'pickup_long' => $store->long,
-                    'dropoff_lat' => $dropoff['lat'],
-                    'dropoff_long' => $dropoff['long'],
-                    'delivery_fee' => null,
-                    'total_price' => $subtotal ,
-                    'description' => $extra['description'] ?? null,
+            foreach ($cart->items as $item) {
+                $order->products()->attach($item->product_id, [
+                    'quantity' => $item->quantity,
+                    'total_price' => $item->quantity * $item->price,
                 ]);
-
-                foreach ($items as $item) {
-                    $order->products()->attach($item->product_id, [
-                        'quantity' => $item->quantity,
-                        'total_price' => $item->quantity * $item->price,
-                    ]);
-                }
-
-                $createdOrders->push($order);
             }
 
-            // Empty the cart
             $cart->items()->delete();
-
-            return $createdOrders->map(function ($order) {
-                return $order->load('products.store', 'customer');
-            });
+            return $order;
         });
+
+        return Order::with('products.store', 'customer')
+            ->where('id', $order->id)
+            ->paginate($perPage);
     }
 
-//    protected function calculateDeliveryFee($store, array $dropoff): float
-//    {
-//        // Implement your distance‐based fee or flat fee
-//        return 5.00;
-//    }
+    public function checkoutCustomDelivery($user, array $dropoff, array $extra = [], int $perPage = 10)
+    {
+        $order = Order::create([
+            'customer_id' => $user->id,
+            'type' => \App\Enums\OrderType::CUSTOM, // custom delivery
+            'delivery_type' => \App\Enums\DeliveryType::SLOW,
+            'status' => \App\Enums\OrderStatus::PENDING,
+            'pickup_address' => $extra['pickup_address'] ?? null,
+            'pickup_lat' => $extra['pickup_lat'] ?? null,
+            'pickup_long' => $extra['pickup_long'] ?? null,
+            'dropoff_address' => $dropoff['address'],
+            'dropoff_lat' => $dropoff['lat'],
+            'dropoff_long' => $dropoff['long'],
+            'delivery_fee' => null,
+            'total_price' => null, // not calculated yet
+            'description' => $extra['description'] ?? null,
+        ]);
+
+        return Order::with('customer')->where('id', $order->id)->paginate($perPage);
+    }
+
+
 }
 

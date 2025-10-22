@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RatingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -44,12 +45,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/offers', 'myOffers');
         Route::post('/orders/{order}/status', 'updateStatus');
         Route::post('/order/{order}/offer', 'storeOffer');
+        Route::post('/available', 'changeAvailability');
     });
 
     Route::prefix('customer')->controller(CustomerController::class)->group(function () {
         Route::get('/orders', 'myOrders');
         Route::get('/orders/{id}', 'showOrder');
         Route::post('/orders/{order}/cancel', 'cancelOrder');
-        Route::post('/{order}/offer/{offer}/accept', 'accept');
+        Route::post('/offer/{offer}/accept', 'accept');
+    });
+
+    Route::prefix('rate')->controller(RatingController::class)->group(function (){
+       Route::post('/user/{order}','rateUser');
     });
 });
