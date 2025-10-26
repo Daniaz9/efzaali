@@ -11,6 +11,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -25,6 +26,12 @@ class Customers extends ListRecords
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->role('normal-user'))
             ->columns([
+                ImageColumn::make('photo.path')
+                    ->label('')
+                    ->circular()
+                    ->height(40)
+                    ->width(40)
+                    ->disk('public'),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
@@ -35,7 +42,10 @@ class Customers extends ListRecords
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+
             ])
             ->headerActions([
                 CreateAction::make()

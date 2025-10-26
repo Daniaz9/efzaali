@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
 
-class RegisterRequest extends FormRequest
+class RegisterDriverRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,13 +23,16 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:6',
-            'rating' => 'nullable',
-//            'role' => ['required', 'string', Role::in(['customer','driver','admin'])],
-            'phone_number' => 'sometimes|string|max:10',
-            'is_available' => 'sometimes|boolean',
-            'photo' => 'sometimes|image|mimes:jpg,png,jpeg,gif,webp|max:2048',
+            'phone_number' => 'nullable|string|max:20',
+            'vehicle_type' => 'required|string|max:255',
+            'license_plate' => 'required|string|max:255|unique:users,license_plate',
+            'is_available' => 'nullable|boolean',
+            'lat' => 'nullable|numeric',
+            'long' => 'nullable|numeric',
+            'address' => 'nullable|string|max:255',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ];
     }
 }

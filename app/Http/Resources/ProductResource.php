@@ -16,20 +16,11 @@ class ProductResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'customer' => new UserResource($this->customer),
-            'type' => $this->type,
-            'delivery_type' => $this->delivery_type,
-            'status' => $this->status,
-            'pickup_address' => $this->pickup_address,
-            'dropoff_address' => $this->dropoff_address,
-            'pickup_lat' => $this->pickup_lat,
-            'pickup_long' => $this->pickup_long,
-            'dropoff_lat' => $this->dropoff_lat,
-            'dropoff_long' => $this->dropoff_long,
-            'delivery_fee' => $this->delivery_fee,
-            'total_price' => $this->total_price,
+            'name' => $this->name,
+            'price' => $this->price,
             'description' => $this->description,
-            'items' => ProductResource::collection($this->whenLoaded('products')), // only products
+            'stock' => $this->stock,
+            'store' => new StoreResource($this->store),
         ];
     }}
 

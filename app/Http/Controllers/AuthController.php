@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\RegisterCustomerRequest;
+use App\Http\Requests\RegisterDriverRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
@@ -16,7 +17,7 @@ class AuthController extends Controller
 {
     use HandlesImages;
 
-    public function register(RegisterRequest $request)
+    public function registerCustomer(RegisterCustomerRequest $request)
     {
         $validated = $request->validated();
 
@@ -25,10 +26,11 @@ class AuthController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'phone_number' => $validated['phone_number'],
-            'is_available' => $validated['is_available'] ?? 0,
-        ]);
+            'lat' => $validated['lat'] ?? null,
+            'long' => $validated['long'] ?? null,
+            'address' => $validated['address'] ?? null,        ]);
 
-        $user->assignRole('normal-user');
+        $user->assignRole(\Spatie\Permission\Models\Role::findByName('customer', 'sanctum'));
 
         if ($request->hasFile('photo')) {
             $avatarPath = $request->file('photo')->store('photos/avatars', 'public');
@@ -52,8 +54,54 @@ class AuthController extends Controller
             'user' => new UserResource($user),
             'token' => $token,
             'token_type' => 'Bearer',
+            'per'=>$user->getAllPermissions(),   // Shows all permissions for that role
         ], 'User registered successfully');
     }
+
+    public function registerDriver(RegisterDriverRequest $request)
+    {
+        $validated = $request->validated();
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'phone_number' => $validated['phone_number'] ?? null,
+            'vehicle_type' => $validated['vehicle_type'],
+            'license_plate' => $validated['license_plate'],
+            'is_available' => $validated['is_available'] ?? 0,
+            'lat' => $validated['lat'] ?? null,
+            'long' => $validated['long'] ?? null,
+            'address' => $validated['address'] ?? null,
+        ]);
+
+        $user->assignRole('driver');
+
+        if ($request->hasFile('photo')) {
+            $avatarPath = $request->file('photo')->store('photos/avatars', 'public');
+            $this->createSmallImage($avatarPath);
+
+            $user->photo()->create([
+                'path' => $avatarPath,
+            ]);
+        } else {
+            $defaultPath = 'photos/avatars/default-avatar.jpg';
+            $user->photo()->create([
+                'path' => $defaultPath,
+            ]);
+        }
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        $user->load('photo', 'roles');
+
+        return $this->sendResponse([
+            'user' => new UserResource($user),
+            'token' => $token,
+            'token_type' => 'Bearer',
+        ], 'Driver registered successfully');
+    }
+
 
     public function login(LoginRequest $request)
     {

@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\RatingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -8,21 +7,19 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\RatingController;
 use App\Http\Controllers\StoreController;
+use Spatie\Permission\Models\Role;
 
-// ----------------------------------------
-// Public Routes
-// ----------------------------------------
 
-Route::post('register', [AuthController::class, 'register']);
+
+Route::post('register/customer', [AuthController::class, 'registerCustomer']);
+Route::post('register/driver', [AuthController::class, 'registerDriver']);
 Route::post('login', [AuthController::class, 'login']);
 
-Route::apiResource('stores', StoreController::class);
-Route::apiResource('products', ProductController::class);
+Route::apiResource('stores', StoreController::class)->only(['index', 'show']);
+Route::apiResource('products', ProductController::class)->only(['index', 'show']);
 
-// ----------------------------------------
-// Authenticated Routes
-// ----------------------------------------
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -31,31 +28,37 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    Route::prefix('cart')->controller(CartController::class)->group(function () {
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::put('/{id}', 'update');
-        Route::delete('/{id}', 'destroy');
-        Route::post('/checkout', 'checkout');
+    Route::middleware(['role:customer'])->prefix('customer')->controller(CustomerController::class)->group(function () {
+        Route::get('/orders', 'myOrders')->middleware('permission:view orders');
+        Route::get('/orders/{id}', 'showOrder')->middleware('permission:view orders');
+        Route::post('/orders/{order}/cancel', 'cancelOrder')->middleware('permission:cancel orders');
+        Route::post('/offer/{offer}/accept', 'accept')->middleware('permission:create orders');
     });
 
-    Route::prefix('driver')->controller(DriverController::class)->group(function () {
-        Route::get('/orders/open', 'openOrders');
-        Route::get('/orders', 'myOrders');
-        Route::get('/offers', 'myOffers');
-        Route::post('/orders/{order}/status', 'updateStatus');
-        Route::post('/order/{order}/offer', 'storeOffer');
-        Route::post('/available', 'changeAvailability');
+    Route::middleware(['role:customer'])->prefix('cart')->controller(CartController::class)->group(function () {
+        Route::get('/', 'index')->middleware('permission:view orders');
+        Route::post('/', 'store')->middleware('permission:create orders');
+        Route::put('/{id}', 'update')->middleware('permission:create orders');
+        Route::delete('/{id}', 'destroy')->middleware('permission:create orders');
+        Route::post('/checkout', 'checkout')->middleware('permission:create orders');
     });
 
-    Route::prefix('customer')->controller(CustomerController::class)->group(function () {
-        Route::get('/orders', 'myOrders');
-        Route::get('/orders/{id}', 'showOrder');
-        Route::post('/orders/{order}/cancel', 'cancelOrder');
-        Route::post('/offer/{offer}/accept', 'accept');
+    Route::middleware(['role:driver'])->prefix('driver')->controller(DriverController::class)->group(function () {
+        Route::get('/orders/open', 'openOrders')->middleware('permission:view orders');
+        Route::get('/orders', 'myOrders')->middleware('permission:view orders');
+        Route::get('/offers', 'myOffers')->middleware('permission:view orders');
+        Route::post('/orders/{order}/status', 'updateStatus')->middleware('permission:update order status');
+        Route::post('/order/{order}/offer', 'storeOffer')->middleware('permission:create offers');
+        Route::post('/available', 'changeAvailability')->middleware('permission:change availability');
     });
 
-    Route::prefix('rate')->controller(RatingController::class)->group(function (){
-       Route::post('/user/{order}','rateUser');
+    Route::middleware(['permission:rate user'])->prefix('rate')->controller(RatingController::class)->group(function () {
+        Route::post('/user/{order}', 'rateUser');
     });
-});
+
+    Route::middleware(['role:admin|super_admin'])->group(function () {
+        Route::apiResource('stores', StoreController::class)->except(['index', 'show']);
+        Route::apiResource('products', ProductController::class)->except(['index', 'show']);
+    });
+}
+);

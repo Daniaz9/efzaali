@@ -69,11 +69,11 @@ class UserResource extends Resource
                 ->sort(static::getNavigationSort())
                 ->badge(static::getNavigationBadge(), color: static::getNavigationBadgeColor()),
 
-            NavigationItem::make('All Users')
-                ->group(static::getNavigationGroup())
-                ->icon('heroicon-o-users')
-                ->isActiveWhen(fn (): bool => request()->routeIs(static::getRouteBaseName() . '.index'))
-                ->url(static::getUrl('index')),
+//            NavigationItem::make('All Users')
+//                ->group(static::getNavigationGroup())
+//                ->icon('heroicon-o-users')
+//                ->isActiveWhen(fn (): bool => request()->routeIs(static::getRouteBaseName() . '.index'))
+//                ->url(static::getUrl('index')),
 
             NavigationItem::make('Drivers')
                 ->group(static::getNavigationGroup())
