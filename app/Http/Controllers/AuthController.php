@@ -54,7 +54,6 @@ class AuthController extends Controller
             'user' => new UserResource($user),
             'token' => $token,
             'token_type' => 'Bearer',
-            'per'=>$user->getAllPermissions(),   // Shows all permissions for that role
         ], 'User registered successfully');
     }
 

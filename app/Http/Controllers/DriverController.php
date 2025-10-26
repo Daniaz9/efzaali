@@ -13,13 +13,22 @@ class DriverController extends Controller
 {
     public function openOrders(Request $request)
     {
-        $orders = Order::openOrder()
-            ->with(['customer','offers'])
-            ->latest()
-            ->simplePaginate(10);
-        if ($orders->isEmpty()) {
-            return $this->sendResponse([], 'no orders available');
+        $driver = $request->user();
+        $maxDistance = $request->max_distance; // optional, in km
+
+        if (!$driver->lat || !$driver->long) {
+            return $this->sendError('Driver location not set.');
         }
+
+        $orders = Order::openOrder()
+            ->nearestToDriver($driver->lat, $driver->long, $maxDistance)
+            ->with(['customer', 'offers'])
+            ->simplePaginate(10);
+
+        if ($orders->isEmpty()) {
+            return $this->sendResponse([], 'No orders available');
+        }
+
         return OrderResource::collection($orders)
             ->additional(['message' => "List of available orders", 'success' => true]);
     }

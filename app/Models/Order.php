@@ -79,4 +79,21 @@ class Order extends Model
             ->whereNull('driver_id');
     }
 
+    public function scopeNearestToDriver( $query, float $driverLat, float $driverLong, ?float $maxDistance = null)
+    {
+        // Haversine formula in kilometers
+        $haversine = "(6371 * acos(cos(radians(?)) * cos(radians(pickup_lat)) * cos(radians(pickup_long) - radians(?)) + sin(radians(?)) * sin(radians(pickup_lat))))";
+
+        // Add distance as a column
+        $query->selectRaw("orders.*, $haversine AS distance", [$driverLat, $driverLong, $driverLat])
+            ->orderBy('distance', 'asc');
+
+        // Apply max distance filter if provided
+        if ($maxDistance !== null) {
+            $query->havingRaw('distance <= ?', [$maxDistance]);
+        }
+
+        return $query;
+    }
+
 }

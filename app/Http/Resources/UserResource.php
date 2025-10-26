@@ -23,6 +23,9 @@ class UserResource extends JsonResource
                 'path' => $this->photo->path,
                 'small_path' => $this->photo->small_path,
             ] : null,
+            'lat' => $this->lat,
+            'long' => $this->long,
+            'address' => $this->address,
             'roles' => $this->roles->pluck('name'),
             'rating' => $this->ratingStats()['avg'],
         ];

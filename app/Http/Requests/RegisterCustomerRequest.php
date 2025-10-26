@@ -31,6 +31,9 @@ class RegisterCustomerRequest extends FormRequest
             'phone_number' => 'sometimes|string|max:10',
             'is_available' => 'sometimes|boolean',
             'photo' => 'sometimes|image|mimes:jpg,png,jpeg,gif,webp|max:2048',
+            'lat' => 'nullable|numeric',
+            'long' => 'nullable|numeric',
+            'address' => 'nullable|string|max:255',
         ];
     }
 }
