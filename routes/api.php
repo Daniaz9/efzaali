@@ -62,10 +62,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('products', ProductController::class)->except(['index', 'show']);
     });
 
-    Route::controller(ChatController::class)->group(function () {
-        Route::get('/messages', 'index');
-        Route::post('/messages',  'store');
-        Route::get('/conversations', 'conversations');
+    Route::middleware(['role:driver|customer|super_admin'])->controller(ChatController::class)->group(function () {
+        Route::get('/messages', 'index')->middleware('permission:view chat messages');
+        Route::post('/messages',  'store')->middleware('permission:send message');
+        Route::get('/conversations', 'conversations')->middleware('permission:view conversations');
 
     });
 }

@@ -42,6 +42,11 @@ class RoleSeeder extends Seeder
             // === Admin / System ===
             'manage system settings',
             'view dashboard',
+
+            // === Chat ===
+            'send message',
+            'view chat messages',
+            'view conversations'
         ];
 
         // Create permissions
@@ -78,6 +83,9 @@ class RoleSeeder extends Seeder
             'create offers',
             'view offers',
             'rate user',
+            'send message',
+            'view chat messages',
+            'view conversations'
         ]);
 
         $customer->syncPermissions([
@@ -86,6 +94,9 @@ class RoleSeeder extends Seeder
             'view orders',
             'rate user',
             'assign driver to orders',
+            'send message',
+            'view chat messages',
+            'view conversations'
         ]);
     }
 }
