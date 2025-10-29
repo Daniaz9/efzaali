@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -59,6 +60,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware(['role:admin|super_admin'])->group(function () {
         Route::apiResource('stores', StoreController::class)->except(['index', 'show']);
         Route::apiResource('products', ProductController::class)->except(['index', 'show']);
+    });
+
+    Route::controller(ChatController::class)->group(function () {
+        Route::get('/messages', 'index');
+        Route::post('/messages',  'store');
+        Route::get('/conversations', 'conversations');
+
     });
 }
 );
