@@ -25,9 +25,12 @@ class CreateStore extends CreateRecord
             $path = $photo->store('photos/stores', 'public');
 
         }
-        $this->createSmallImage($photo);
+        if($photo!=null){
+            $this->createSmallImage($photo);
 
-        $store->photo()->create(['path' => $photo]);
+            $store->photo()->create(['path' => $photo]);
+        }
+
 
         return $store;
     }

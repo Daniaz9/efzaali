@@ -24,7 +24,9 @@ class Driverss extends ListRecords
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->role('driver'))
+            ->modifyQueryUsing(function (Builder $query) {
+                return $query->role('driver');
+            })
             ->columns([
                 ImageColumn::make('photo.path')
                     ->label('')

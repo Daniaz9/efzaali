@@ -24,7 +24,9 @@ class Customers extends ListRecords
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->role('normal-user'))
+            ->modifyQueryUsing(function (Builder $query) {
+                return $query->role('customer');
+            })
             ->columns([
                 ImageColumn::make('photo.path')
                     ->label('')

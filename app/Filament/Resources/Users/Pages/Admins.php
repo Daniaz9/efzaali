@@ -25,7 +25,7 @@ class Admins extends ListRecords
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->role(['admin', 'super-admin']))
+            ->modifyQueryUsing(fn (Builder $query) => $query->role(['admin', 'super_admin']))
             ->columns([
                 TextColumn::make('name')
                     ->searchable()

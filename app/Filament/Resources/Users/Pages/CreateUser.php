@@ -15,23 +15,49 @@ class CreateUser extends CreateRecord
 
     protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
     {
+        $role = $this->getUserRoleForThisPage();
+
         $photo = $data['photo'] ?? null;
         unset($data['photo']);
 
         // Create the user (without photo)
         $user = static::getModel()::create($data);
+        $user->assignRole($role);
+
 
         // Handle the photo upload if exists
         if ($photo instanceof TemporaryUploadedFile) {
             $path = $photo->store('photos/users', 'public');
-            $this->createSmallImage($path);
-            $user->photo()->create(['path' => $path]);
-        }else{
-            $path= $data['photo'];
-            $this->createSmallImage($path);
-            $user->photo()->create(['path' => $path]);
+//            $this->createSmallImage($path);
+//            $user->photo()->create(['path' => $path]);
         }
 
+        if ($photo!=null){
+            $this->createSmallImage($photo);
+
+            $user->photo()->create(['path' => $photo]);
+        }
+
+
         return $user;
+    }
+
+    protected function getUserRoleForThisPage(): string
+    {
+        $pageClass = $this->previousUrl ?? null;
+
+        if (str_contains($pageClass, 'customers')) {
+            return 'customer';
+        }
+
+        if (str_contains($pageClass, 'drivers')) {
+            return 'driver';
+        }
+
+        if (str_contains($pageClass, 'admins')) {
+            return 'admin';
+        }
+
+        return 'customer'; // fallback
     }
 }

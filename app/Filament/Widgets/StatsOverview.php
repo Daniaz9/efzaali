@@ -63,14 +63,14 @@ class StatsOverview extends StatsOverviewWidget
                 ])),
 
             //Total customers
-            Stat::make('Total Customers', User::role('normal-user')->count())
+            Stat::make('Total Customers', User::role('customer')->count())
                 ->description('Registered customers')
                 ->descriptionIcon('heroicon-m-users')
                 ->color('info')
                 ->chart($this->getDriverGrowthChart())
                 ->url(route('filament.admin.resources.users.index', [
                     'tableFilters' => [
-                        'role' => ['value' => 'normal-user']
+                        'role' => ['value' => 'customer']
                     ]
                 ])),
         ];
@@ -115,7 +115,7 @@ class StatsOverview extends StatsOverviewWidget
     protected function getCustomerGrowthChart(): array
     {
         // Last 7 days customer growth
-        return User::role('normal-user')
+        return User::role('customer')
             ->where('created_at', '>=', now()->subDays(7))
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')
