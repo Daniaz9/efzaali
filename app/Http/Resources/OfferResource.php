@@ -21,8 +21,5 @@ class OfferResource extends JsonResource
             'price' => $this->price,
             'message' => $this->message,
             'average_delivery_time'=> $this->average_delivery_time,
-            'is_accepted' => (bool) $this->is_accepted,
-            'accepted_at' => $this->accepted_at,
-            'rejected_at' => $this->rejected_at,
         ];
     }}

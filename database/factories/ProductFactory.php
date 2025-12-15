@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Brand;
 use App\Models\Product;
 use App\Models\Store;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -21,9 +22,22 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         return [
+            'brand_id'=> Brand::inRandomOrder()->first()?->id ?? Brand::factory(),
             'store_id' => Store::inRandomOrder()->first()?->id ?? Store::factory(),
-            'name' => $this->faker->words(3, true),
-            'description' => $this->faker->paragraph(),
+            'name' => $this->faker->randomElement([
+                'ساعة يد رجالية',
+                'حاسوب محمول',
+                'قميص قطني',
+                'علبة شوكولاتة',
+                'سماعات بلوتوث',
+                'زيت عطري',
+            ]),
+            'description' => $this->faker->randomElement([
+                'منتج عالي الجودة مناسب للاستخدام اليومي.',
+                'مصنوع من مواد ممتازة ويوفر أداءً ممتازًا.',
+                'خيار مثالي لمن يبحث عن الجودة والسعر المناسب.',
+                'مصمم بعناية ليناسب احتياجات جميع المستخدمين.',
+            ]),
             'price' => $this->faker->randomFloat(2, 5, 500),
             'stock' => $this->faker->numberBetween(0, 200),
         ];

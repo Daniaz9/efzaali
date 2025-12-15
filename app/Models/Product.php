@@ -12,6 +12,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable =[
+        'brand_id',
         'store_id',
         'name',
         'description',
@@ -34,4 +35,13 @@ class Product extends Model
         return $this->morphMany(\App\Models\Photo::class, 'imageable');
     }
 
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
+    }
+
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
+    }
 }

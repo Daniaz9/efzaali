@@ -18,16 +18,27 @@ class ChatController extends Controller
         ]);
 
         $senderId = $request->user()->id;
+
+        // Fetch the order with relationships
         $order = Order::with(['driver', 'customer'])->findOrFail($data['order_id']);
 
+        // Check if driver is assigned
+        if (!$order->driver) {
+            return $this->sendError('No driver is assigned to this order');
+            // or you can throw an exception:
+            // throw new \Exception('No driver assigned to this order');
+        }
+
+        // Determine receiver
         if ($senderId == $order->customer->id) {
             $receiverId = $order->driver->id;
         } elseif ($senderId == $order->driver->id) {
             $receiverId = $order->customer->id;
         } else {
-            return $this->sendError('You are not part of this order', 403);
+            return $this->sendError('You are not part of this order');
         }
 
+        // Find or create conversation
         $conversation = Conversation::where('order_id', $data['order_id'])
             ->where(function($q) use ($senderId, $receiverId) {
                 $q->where(function($q2) use ($senderId, $receiverId) {

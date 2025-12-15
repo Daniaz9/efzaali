@@ -1,0 +1,18 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Advertisement extends Model
+{
+    protected $fillable = [
+        'store_id',
+        'poster_path',
+    ];
+
+    public function store()
+    {
+        return $this->belongsTo(Store::class);
+    }
+}

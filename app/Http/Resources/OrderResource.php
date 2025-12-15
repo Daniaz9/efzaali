@@ -16,6 +16,7 @@ class OrderResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'order_number' => $this->order_number,
             'customer' => new UserResource($this->whenLoaded('customer')),
             'driver' => new UserResource($this->whenLoaded('driver')),
             'type' => $this->type,
@@ -30,7 +31,7 @@ class OrderResource extends JsonResource
             'delivery_fee' => $this->delivery_fee,
             'total_price' => $this->total_price,
             'description' => $this->description,
-
+            'created_at_arabic' =>$this->created_at_arabic,
             // Combine all products into "items"
             'items' => $this->whenLoaded('products', function () {
                 return $this->products->map(function ($product) {

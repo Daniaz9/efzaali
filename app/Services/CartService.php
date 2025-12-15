@@ -87,7 +87,9 @@ class CartService
         }
 
         $order = DB::transaction(function () use ($user, $cart, $dropoff, $extra) {
-            $total = $cart->items->sum(fn($item) => $item->quantity * $item->price);
+            $total = $cart->items->sum(function ($item) {
+                return $item->quantity * $item->price;
+            });
 
             $order = Order::create([
                 'customer_id' => $user->id,

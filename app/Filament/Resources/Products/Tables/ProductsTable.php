@@ -30,6 +30,8 @@ class ProductsTable
 
                 TextColumn::make('store.name')
                     ->sortable(),
+                TextColumn::make('brand.name')
+                    ->sortable(),
                 TextColumn::make('price')
                     ->money()
                     ->sortable()
@@ -56,6 +58,8 @@ class ProductsTable
             ->filters([
                 SelectFilter::make('store')
                 ->relationship('store','name'),
+                SelectFilter::make('brand')
+                ->relationship('brand','name'),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,7 @@ class Order extends Model
     /** @use HasFactory<\Database\Factories\OrderFactory> */
     use HasFactory;
     protected $fillable = [
+        'order_number',
         'customer_id',
         'driver_id',
         'type',
@@ -51,6 +53,34 @@ class Order extends Model
             'picked_up_at' => 'datetime',
             'delivered_at' => 'datetime',
         ];
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($order) {
+            $order->order_number = self::generateOrderNumber();
+        });
+    }
+    public function getCreatedAtArabicAttribute()
+    {
+        if (!$this->created_at) {
+            return null;
+        }
+
+        return Carbon::parse($this->created_at)->translatedFormat('l d F، Y');
+    }
+
+    public static function generateOrderNumber()
+    {
+        // get last order
+        $lastOrder = self::orderBy('id', 'desc')->first();
+
+        // increment
+        $next = $lastOrder ? ((int) filter_var($lastOrder->order_number, FILTER_SANITIZE_NUMBER_INT)) + 1 : 545425;
+
+        return '#' . $next;
     }
 
     public function customer()

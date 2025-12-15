@@ -22,6 +22,10 @@ class ProductForm
                     ->label('Store')
                     ->relationship('store', 'name')
                     ->required(),
+                Select::make('brand_id')
+                    ->label('Brand')
+                    ->relationship('brand', 'name')
+                    ->required(),
                 TextInput::make('name')
                     ->required(),
                 Textarea::make('description')

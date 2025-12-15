@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\AdvertisementController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\FavoriteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -64,9 +66,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware(['role:driver|customer|super_admin'])->controller(ChatController::class)->group(function () {
         Route::get('/messages', 'index')->middleware('permission:view chat messages');
-        Route::post('/messages',  'store')->middleware('permission:send message');
+        Route::post('/messages', 'store')->middleware('permission:send message');
         Route::get('/conversations', 'conversations')->middleware('permission:view conversations');
 
     });
-}
-);
+
+    Route::middleware(['role:customer'])->controller(FavoriteController::class)->group(function () {
+        Route::post('/favorites/toggle/{productId}', 'toggle');
+        Route::get('/favorites', 'myFavorites');
+    });
+
+    Route::middleware(['role:customer'])->controller(AdvertisementController::class)->group(function () {
+        Route::get('/ads','index');
+    });
+});
